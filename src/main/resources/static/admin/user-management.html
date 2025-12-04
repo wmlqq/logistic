@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        /* 筛选区域 */
+        .filter-section {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 表格样式 */
+        .table {
+            color: var(--text-color);
+        }
+
+        .table th {
+            background-color: var(--light-color);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table td {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">系统管理员中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="user-management.html" class="active"><i class="fa fa-users"></i> 用户管理</a></li>
+            <li><a href="system-settings.html"><i class="fa fa-cog"></i> 系统设置</a></li>
+            <li><a href="operation-log.html"><i class="fa fa-history"></i> 操作日志</a></li>
+            <li><a href="backup-restore.html"><i class="fa fa-database"></i> 数据备份恢复</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">用户管理</h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 筛选区域 -->
+        <div class="filter-section">
+            <form id="userFilterForm">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">用户名</label>
+                            <input type="text" class="form-control" id="username" placeholder="请输入用户名">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="role" class="form-label">角色</label>
+                            <select class="form-select" id="role">
+                                <option value="">全部角色</option>
+                                <option value="CUSTOMER">客户</option>
+                                <option value="MANAGER">物流经理</option>
+                                <option value="WAREHOUSE">仓库管理员</option>
+                                <option value="DELIVERY">配送员</option>
+                                <option value="FINANCE">财务人员</option>
+                                <option value="ADMIN">系统管理员</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="status" class="form-label">状态</label>
+                            <select class="form-select" id="status">
+                                <option value="">全部状态</option>
+                                <option value="ACTIVE">活跃</option>
+                                <option value="INACTIVE">禁用</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">手机号</label>
+                            <input type="text" class="form-control" id="phone" placeholder="请输入手机号">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fa fa-search"></i> 搜索
+                        </button>
+                        <button type="button" class="btn btn-success" id="addUserBtn">
+                            <i class="fa fa-plus"></i> 新增用户
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 用户列表 -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>用户ID</th>
+                                <th>用户名</th>
+                                <th>手机号</th>
+                                <th>邮箱</th>
+                                <th>角色</th>
+                                <th>状态</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userList">
+                            <!-- 用户数据将通过AJAX加载 -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 分页 -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination" id="pagination">
+                        <!-- 分页按钮将通过JS动态生成 -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- 创建用户模态框 -->
+    <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createUserModalLabel">新增用户</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createUserForm">
+                        <div class="mb-3">
+                            <label for="newUsername" class="form-label">用户名</label>
+                            <input type="text" class="form-control" id="newUsername" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">密码</label>
+                            <input type="password" class="form-control" id="newPassword" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newRole" class="form-label">角色</label>
+                            <select class="form-select" id="newRole" name="role" required>
+                                <option value="customer">客户</option>
+                                <option value="manager">物流经理</option>
+                                <option value="warehouse">仓库管理员</option>
+                                <option value="delivery">配送员</option>
+                                <option value="finance">财务人员</option>
+                                <option value="admin">系统管理员</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newEmail" class="form-label">邮箱</label>
+                            <input type="email" class="form-control" id="newEmail" name="email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPhone" class="form-label">手机号</label>
+                            <input type="tel" class="form-control" id="newPhone" name="phone">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="submitCreateUser">创建</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入通用JS -->
+    <script src="../common.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 调用退出登录API
+                $.ajax({
+                    url: '/api/logout',
+                    type: 'POST',
+                    success: function(response) {
+                        // 退出成功，跳转到登录页面
+                        window.location.href = '../login.html';
+                    },
+                    error: function(xhr, status, error) {
+                        // 退出失败，直接跳转到登录页面
+                        window.location.href = '../login.html';
+                    }
+                });
+            });
+            
+            // 全局变量
+            let currentPage = 1;
+            const pageSize = 10;
+            
+            // 加载用户列表
+            function loadUsers(page = 1) {
+                const username = $('#username').val();
+                const role = $('#role').val();
+                const statusSelect = $('#status').val();
+                const phone = $('#phone').val();
+                
+                // 转换状态值：前端使用ACTIVE/INACTIVE，后端使用1/0
+                let status = null;
+                if (statusSelect === 'ACTIVE') {
+                    status = 1;
+                } else if (statusSelect === 'INACTIVE') {
+                    status = 0;
+                }
+                
+                // 转换角色值：前端使用大写，后端使用小写
+                const roleLower = role ? role.toLowerCase() : '';
+                
+                // 构建关键词
+                let keyword = '';
+                if (username) {
+                    keyword = username;
+                } else if (phone) {
+                    keyword = phone;
+                }
+                
+                // 调试信息
+                console.log('发送请求到 /api/admin/users');
+                console.log('请求参数:', {
+                    page: page,
+                    size: pageSize,
+                    role: roleLower,
+                    status: status,
+                    keyword: keyword
+                });
+                
+                $.ajax({
+                    url: '/api/admin/users',
+                    type: 'GET',
+                    data: {
+                        page: page,
+                        size: pageSize,
+                        role: roleLower,
+                        status: status,
+                        keyword: keyword
+                    },
+                    success: function(response) {
+                        console.log('收到响应:', response);
+                        if (response.code === 0) {
+                            const users = response.data.records;
+                            const totalPages = response.data.pages;
+                            const tbody = $('#userList');
+                            tbody.empty();
+                            
+                            // 调试信息：查看users数组的长度和内容
+                            console.log('users数组长度:', users.length);
+                            console.log('users数组内容:', users);
+                            
+                            if (users.length === 0) {
+                                console.log('users数组为空，显示"暂无数据"');
+                                tbody.append('<tr><td colspan="8" class="text-center">暂无数据</td></tr>');
+                            } else {
+                                console.log('开始渲染用户数据');
+                                users.forEach((user, index) => {
+                                    console.log(`渲染第${index + 1}个用户:`, user);
+                                    const roleText = getRoleText(user.role);
+                                    const statusText = user.status === 1 ? '活跃' : '禁用';
+                                    const statusClass = user.status === 1 ? 'success' : 'danger';
+                                    
+                                    // 格式化日期
+                                    const createTime = new Date(user.createTime).toLocaleString();
+                                    
+                                    const row = `
+                                        <tr>
+                                            <td>${user.userId}</td>
+                                            <td>${user.username}</td>
+                                            <td>${user.phone || '-'}</td>
+                                            <td>${user.email || '-'}</td>
+                                            <td>${roleText}</td>
+                                            <td><span class="badge bg-${statusClass}">${statusText}</span></td>
+                                            <td>${createTime}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary edit-user-btn" data-user-id="${user.userId}">
+                                                    <i class="fa fa-edit"></i> 编辑
+                                                </button>
+                                                <button class="btn btn-sm btn-danger delete-user-btn" data-user-id="${user.userId}">
+                                                    <i class="fa fa-trash"></i> 删除
+                                                </button>
+                                                <button class="btn btn-sm btn-warning ${user.status === 1 ? 'disable-user-btn' : 'enable-user-btn'}" data-user-id="${user.userId}" data-status="${user.status}">
+                                                    <i class="fa fa-${user.status === 1 ? 'ban' : 'check'}"></i> ${user.status === 1 ? '禁用' : '启用'}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                    tbody.append(row);
+                                });
+                                console.log('用户数据渲染完成');
+                            }
+                            
+                            // 绑定按钮事件
+                            bindUserActionButtons();
+                            
+                            // 生成页码
+                            generatePagination(page, totalPages);
+                        } else {
+                            console.error('响应错误:', response.message);
+                            alert('加载用户列表失败：' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX错误:', status, error);
+                        console.error('响应内容:', xhr.responseText);
+                        alert('加载用户列表失败：' + error);
+                    }
+                });
+            }
+            
+            // 获取角色文本
+            function getRoleText(role) {
+                const roleMap = {
+                    'customer': '客户',
+                    'manager': '物流经理',
+                    'warehouse': '仓库管理员',
+                    'delivery': '配送员',
+                    'finance': '财务人员',
+                    'admin': '系统管理员'
+                };
+                return roleMap[role] || '未知角色';
+            }
+            
+            // 绑定用户操作按钮事件
+            function bindUserActionButtons() {
+                // 编辑用户
+                $('.edit-user-btn').click(function() {
+                    const userId = $(this).data('user-id');
+                    // 跳转到编辑页面或显示编辑模态框
+                    alert('编辑用户功能尚未实现');
+                });
+                
+                // 删除用户
+                $('.delete-user-btn').click(function() {
+                    const userId = $(this).data('user-id');
+                    if (confirm('确定要删除该用户吗？')) {
+                        deleteUser(userId);
+                    }
+                });
+                
+                // 禁用/启用用户
+                $('.disable-user-btn, .enable-user-btn').click(function() {
+                    const userId = $(this).data('user-id');
+                    const currentStatus = $(this).data('status');
+                    const newStatus = currentStatus === 1 ? 0 : 1;
+                    updateUserStatus(userId, newStatus);
+                });
+            }
+            
+            // 删除用户
+            function deleteUser(userId) {
+                $.ajax({
+                    url: `/api/admin/users/${userId}`,
+                    type: 'DELETE',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            alert('用户删除成功');
+                            loadUsers(currentPage);
+                        } else {
+                            alert('用户删除失败：' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('用户删除失败：' + error);
+                    }
+                });
+            }
+            
+            // 更新用户状态
+            function updateUserStatus(userId, status) {
+                $.ajax({
+                    url: `/api/admin/users/${userId}/status`,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ status: status }),
+                    success: function(response) {
+                        if (response.code === 0) {
+                            alert('用户状态更新成功');
+                            loadUsers(currentPage);
+                        } else {
+                            alert('用户状态更新失败：' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('用户状态更新失败：' + error);
+                    }
+                });
+            }
+            
+            // 生成页码
+            function generatePagination(page, totalPages) {
+                const pagination = $('#pagination');
+                pagination.empty();
+                
+                // 上一页
+                const prevLi = $('<li class="page-item"></li>');
+                const prevLink = $('<a class="page-link" href="#" aria-label="Previous"></a>');
+                prevLink.html('<span aria-hidden="true">&laquo;</span>');
+                if (page === 1) {
+                    prevLi.addClass('disabled');
+                } else {
+                    prevLink.click(function(e) {
+                        e.preventDefault();
+                        loadUsers(page - 1);
+                    });
+                }
+                prevLi.append(prevLink);
+                pagination.append(prevLi);
+                
+                // 页码
+                for (let i = 1; i <= totalPages; i++) {
+                    const li = $('<li class="page-item"></li>');
+                    const link = $('<a class="page-link" href="#"></a>');
+                    link.text(i);
+                    if (i === page) {
+                        li.addClass('active');
+                    } else {
+                        link.click(function(e) {
+                            e.preventDefault();
+                            loadUsers(i);
+                        });
+                    }
+                    li.append(link);
+                    pagination.append(li);
+                }
+                
+                // 下一页
+                const nextLi = $('<li class="page-item"></li>');
+                const nextLink = $('<a class="page-link" href="#" aria-label="Next"></a>');
+                nextLink.html('<span aria-hidden="true">&raquo;</span>');
+                if (page === totalPages) {
+                    nextLi.addClass('disabled');
+                } else {
+                    nextLink.click(function(e) {
+                        e.preventDefault();
+                        loadUsers(page + 1);
+                    });
+                }
+                nextLi.append(nextLink);
+                pagination.append(nextLi);
+                
+                currentPage = page;
+            }
+            
+            // 新增用户按钮事件
+            $('#addUserBtn').click(function() {
+                // 显示新增用户模态框
+                const modal = new bootstrap.Modal(document.getElementById('createUserModal'));
+                modal.show();
+            });
+            
+            // 提交创建用户表单
+            $('#submitCreateUser').click(function() {
+                if ($('#createUserForm')[0].checkValidity()) {
+                    createUser();
+                } else {
+                    $('#createUserForm')[0].reportValidity();
+                }
+            });
+            
+            // 创建用户
+            function createUser() {
+                const username = $('#newUsername').val();
+                const password = $('#newPassword').val();
+                const role = $('#newRole').val();
+                const email = $('#newEmail').val();
+                const phone = $('#newPhone').val();
+                
+                // 调试信息
+                console.log('发送请求到 /api/admin/users');
+                console.log('请求参数:', {
+                    username: username,
+                    password: password,
+                    role: role,
+                    email: email,
+                    phone: phone,
+                    status: 1
+                });
+                
+                $.ajax({
+                    url: '/api/admin/users',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        username: username,
+                        password: password,
+                        role: role,
+                        email: email,
+                        phone: phone,
+                        status: 1 // 默认为活跃状态
+                    }),
+                    success: function(response) {
+                        console.log('收到响应:', response);
+                        if (response.code === 0) {
+                            alert('用户创建成功');
+                            // 关闭模态框
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('createUserModal'));
+                            modal.hide();
+                            // 重置表单
+                            $('#createUserForm')[0].reset();
+                            // 重新加载用户列表
+                            loadUsers(currentPage);
+                        } else {
+                            console.error('响应错误:', response.message);
+                            alert('用户创建失败：' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX错误:', status, error);
+                        console.error('响应内容:', xhr.responseText);
+                        alert('用户创建失败：' + error);
+                    }
+                });
+            }
+            
+            // 表单提交
+            $('#userFilterForm').submit(function(e) {
+                e.preventDefault();
+                loadUsers(1);
+            });
+            
+            // 初始化加载用户列表
+            loadUsers(1);
+        });
+    </script>
+</body>
+</html>

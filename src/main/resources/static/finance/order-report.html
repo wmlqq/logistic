@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单量报表 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        /* 筛选区域 */
+        .filter-section {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            height: 300px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--light-color);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">财务人员中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="financial-report.html"><i class="fa fa-file-text-o"></i> 物流费用报表</a></li>
+            <li><a href="order-report.html" class="active"><i class="fa fa-shopping-cart"></i> 订单量报表</a></li>
+            <li><a href="profile.html"><i class="fa fa-user"></i> 个人资料</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">订单量报表</h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 筛选区域 -->
+        <div class="filter-section">
+            <form id="orderReportFilterForm">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="orderReportType" class="form-label">报表类型</label>
+                            <select class="form-select" id="orderReportType">
+                                <option value="daily">日报</option>
+                                <option value="weekly">周报</option>
+                                <option value="monthly">月报</option>
+                                <option value="quarterly">季报</option>
+                                <option value="yearly">年报</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="orderYear" class="form-label">年份</label>
+                            <select class="form-select" id="orderYear">
+                                <!-- 年份选项将通过JavaScript动态生成 -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="orderMonth" class="form-label">月份</label>
+                            <select class="form-select" id="orderMonth">
+                                <option value="1">1月</option>
+                                <option value="2">2月</option>
+                                <option value="3">3月</option>
+                                <option value="4">4月</option>
+                                <option value="5">5月</option>
+                                <option value="6">6月</option>
+                                <option value="7">7月</option>
+                                <option value="8">8月</option>
+                                <option value="9">9月</option>
+                                <option value="10">10月</option>
+                                <option value="11">11月</option>
+                                <option value="12">12月</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fa fa-search"></i> 生成报表
+                            </button>
+                            <button type="button" class="btn btn-success" id="exportOrderReportBtn">
+                                <i class="fa fa-download"></i> 导出
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 订单量统计 -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">总订单量</h6>
+                        <h4 class="card-title" id="totalOrderCount">0</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">已完成订单</h6>
+                        <h4 class="card-title" id="completedOrderCount">0</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">平均订单金额</h6>
+                        <h4 class="card-title" id="avgOrderAmount">¥0.00</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">订单增长率</h6>
+                        <h4 class="card-title" id="orderGrowthRate">0.00%</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 订单量趋势图 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">订单量趋势</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 400px;">
+                    <canvas id="orderTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 订单类型分布 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">订单类型分布</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 400px;">
+                    <canvas id="orderTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <!-- 引入通用JS -->
+    <script src="../common.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 动态生成年份选项
+            function generateYearOptions() {
+                const yearSelect = $('#orderYear');
+                const currentYear = new Date().getFullYear();
+                
+                // 清空现有选项
+                yearSelect.empty();
+                
+                // 生成当前年份和过去4年的年份选项
+                for (let i = currentYear; i >= currentYear - 4; i--) {
+                    const option = $('<option></option>').val(i).text(i);
+                    yearSelect.append(option);
+                }
+            }
+            
+            // 调用函数生成年份选项
+            generateYearOptions();
+            
+            // 从localStorage获取用户信息
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            
+            // 更新用户名称
+            if (userInfo) {
+                $('.user-name').text(userInfo.username);
+            }
+            
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 调用退出登录API
+                $.ajax({
+                    url: '/api/logout',
+                    type: 'POST',
+                    success: function(response) {
+                        // 退出成功，跳转到登录页面
+                        window.location.href = '../login.html';
+                    },
+                    error: function(xhr, status, error) {
+                        // 退出失败，直接跳转到登录页面
+                        window.location.href = '../login.html';
+                    }
+                });
+            });
+            
+            // 生成订单量报表
+            function generateOrderReport() {
+                // 获取筛选条件
+                const reportType = $('#orderReportType').val();
+                const year = $('#orderYear').val();
+                const month = $('#orderMonth').val();
+                
+                // 调用后端订单量报表API获取真实数据
+                $.ajax({
+                    url: '/api/finance/order-report',
+                    type: 'GET',
+                    data: {
+                        reportType: reportType,
+                        year: year,
+                        month: month
+                    },
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const reportData = response.data;
+                            
+                            // 更新统计数据
+                            $('#totalOrderCount').text(reportData.totalOrders || 0);
+                            $('#completedOrderCount').text(reportData.completedOrders || 0);
+                            $('#avgOrderAmount').text('¥' + (reportData.avgOrderAmount || 0).toFixed(2));
+                            $('#orderGrowthRate').text(reportData.orderGrowthRate.toFixed(2) + '%');
+                            
+                            // 处理趋势图数据
+                            const trendData = reportData.trendData.trend;
+                            const labels = trendData.map(item => item.period);
+                            const orderCounts = trendData.map(item => item.count);
+                            
+                            // 绘制订单量趋势图
+                            drawOrderTrendChart({ labels, orderCounts });
+                            
+                            // 绘制订单类型分布图表
+                            drawOrderTypeChart(reportData.orderTypeDistribution);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('生成订单量报表失败:', error);
+                    }
+                });
+            }
+            
+            // 绘制订单量趋势图
+            function drawOrderTrendChart(data) {
+                const ctx = document.getElementById('orderTrendChart').getContext('2d');
+                
+                // 销毁已存在的图表实例
+                if (window.orderTrendChart && typeof window.orderTrendChart.destroy === 'function') {
+                    window.orderTrendChart.destroy();
+                }
+                
+                // 创建新的图表实例
+                window.orderTrendChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: '订单量',
+                            data: data.orderCounts,
+                            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                            borderColor: 'rgba(13, 110, 253, 1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgba(13, 110, 253, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        return `订单量: ${context.parsed.y}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                },
+                                grid: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--border-color')
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                },
+                                grid: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--border-color')
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 绘制订单类型分布图表
+            function drawOrderTypeChart(orderTypeDistribution) {
+                const ctx = document.getElementById('orderTypeChart').getContext('2d');
+                
+                // 销毁已存在的图表实例
+                if (window.orderTypeChart && typeof window.orderTypeChart.destroy === 'function') {
+                    window.orderTypeChart.destroy();
+                }
+                
+                // 使用真实订单类型分布数据
+                const labels = orderTypeDistribution.labels || [];
+                const data = orderTypeDistribution.data || [];
+                
+                // 创建新的图表实例
+                window.orderTypeChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: [
+                                'rgba(13, 110, 253, 0.8)',
+                                'rgba(25, 135, 84, 0.8)',
+                                'rgba(255, 193, 7, 0.8)',
+                                'rgba(220, 53, 69, 0.8)',
+                                'rgba(13, 202, 240, 0.8)',
+                                'rgba(108, 117, 125, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(13, 110, 253, 1)',
+                                'rgba(25, 135, 84, 1)',
+                                'rgba(255, 193, 7, 1)',
+                                'rgba(220, 53, 69, 1)',
+                                'rgba(13, 202, 240, 1)',
+                                'rgba(108, 117, 125, 1)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 导出订单量报表
+            $('#exportOrderReportBtn').click(function() {
+                // 获取筛选条件
+                const reportType = $('#orderReportType').val();
+                const year = $('#orderYear').val();
+                const month = $('#orderMonth').val();
+                
+                // 调用后端API获取真实数据用于导出
+                $.ajax({
+                    url: '/api/finance/order-report',
+                    type: 'GET',
+                    data: {
+                        reportType: reportType,
+                        year: year,
+                        month: month
+                    },
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const reportData = response.data;
+                            
+                            // 获取统计数据
+                            const totalOrderCount = reportData.totalOrders || 0;
+                            const completedOrderCount = reportData.completedOrders || 0;
+                            const avgOrderAmount = reportData.avgOrderAmount || 0;
+                            const orderGrowthRate = reportData.orderGrowthRate || 0;
+                            
+                            // 生成导出数据
+                            function generateExportData() {
+                                const data = [];
+                                const reportTypeMap = {
+                                    'daily': '日报',
+                                    'weekly': '周报',
+                                    'monthly': '月报',
+                                    'quarterly': '季报',
+                                    'yearly': '年报'
+                                };
+                                
+                                // 添加报表标题和筛选条件
+                                data.push(['订单量报表', '', '', '', '', '']);
+                                data.push(['报表类型', reportTypeMap[reportType] || reportType, '', '', '', '']);
+                                data.push(['年份', year, '', '', '', '']);
+                                data.push(['月份', month, '', '', '', '']);
+                                data.push(['', '', '', '', '', '']);
+                                
+                                // 添加统计数据
+                                data.push(['统计项', '数值', '', '', '', '']);
+                                data.push(['总订单量', totalOrderCount, '', '', '', '']);
+                                data.push(['已完成订单', completedOrderCount, '', '', '', '']);
+                                data.push(['平均订单金额', '¥' + avgOrderAmount.toFixed(2), '', '', '', '']);
+                                data.push(['订单增长率', orderGrowthRate.toFixed(2) + '%', '', '', '', '']);
+                                data.push(['', '', '', '', '', '']);
+                                
+                                // 添加订单量趋势数据
+                                data.push(['时间段', '订单量', '', '', '', '']);
+                                
+                                // 使用真实趋势数据
+                                const trendData = reportData.trendData.trend;
+                                trendData.forEach(item => {
+                                    data.push([item.period, item.count, '', '', '', '']);
+                                });
+                                
+                                // 添加订单类型分布数据
+                                data.push(['', '', '', '', '', '']);
+                                data.push(['订单类型', '数量', '', '', '', '']);
+                                
+                                const orderTypeDistribution = reportData.orderTypeDistribution;
+                                for (let i = 0; i < orderTypeDistribution.labels.length; i++) {
+                                    data.push([orderTypeDistribution.labels[i], orderTypeDistribution.data[i], '', '', '', '']);
+                                }
+                                
+                                return data;
+                            }
+                            
+                            // 生成导出数据
+                            const exportData = generateExportData();
+                            
+                            // 转换为CSV格式
+                            let csvContent = exportData.map(row => {
+                                return row.map(cell => `"${cell}"`).join(',');
+                            }).join('\n');
+                            
+                            // 创建下载链接
+                            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+                            const link = document.createElement("a");
+                            
+                            if (link.download !== undefined) {
+                                const url = URL.createObjectURL(blob);
+                                link.setAttribute("href", url);
+                                link.setAttribute("download", `订单量报表_${new Date().toISOString().slice(0, 10)}.csv`);
+                                link.style.visibility = 'hidden';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('导出订单量报表失败:', error);
+                    }
+                });
+            });
+            
+            // 表单提交
+            $('#orderReportFilterForm').submit(function(e) {
+                e.preventDefault();
+                generateOrderReport();
+            });
+            
+            // 初始化生成报表
+            generateOrderReport();
+        });
+    </script>
+</body>
+</html>

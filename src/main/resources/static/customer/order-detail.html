@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单详情 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        /* 订单信息样式 */
+        .order-info-section {
+            margin-bottom: 20px;
+        }
+
+        .order-info-item {
+            margin-bottom: 15px;
+        }
+
+        .order-info-label {
+            font-weight: 600;
+            color: var(--secondary-color);
+            margin-right: 10px;
+        }
+
+        .order-info-value {
+            color: var(--text-color);
+        }
+
+        /* 状态时间轴样式 */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            margin-top: 20px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--border-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -36px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            border: 2px solid var(--card-background);
+        }
+
+        .timeline-item.completed::before {
+            background-color: var(--success-color);
+        }
+
+        .timeline-item.pending::before {
+            background-color: var(--warning-color);
+        }
+
+        .timeline-time {
+            font-size: 14px;
+            color: var(--secondary-color);
+            margin-bottom: 5px;
+        }
+
+        .timeline-content {
+            font-size: 16px;
+            color: var(--text-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">客户中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="order.html" class="active"><i class="fa fa-shopping-cart"></i> 我的订单</a></li>
+            <li><a href="create-order.html"><i class="fa fa-plus-circle"></i> 新建订单</a></li>
+            <li><a href="profile.html"><i class="fa fa-user"></i> 个人资料</a></li>
+            <li><a href="address.html"><i class="fa fa-map-marker"></i> 收货地址</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">订单详情</h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 订单基本信息 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">订单基本信息</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="order-info-section">
+                            <div class="order-info-item">
+                                <span class="order-info-label">订单编号：</span>
+                                <span class="order-info-value" id="orderNumber">-</span>
+                            </div>
+                            <div class="order-info-item">
+                                <span class="order-info-label">下单时间：</span>
+                                <span class="order-info-value" id="createTime">-</span>
+                            </div>
+                            <div class="order-info-item">
+                                <span class="order-info-label">配送方式：</span>
+                                <span class="order-info-value" id="deliveryMethod">-</span>
+                            </div>
+                            <div class="order-info-item">
+                                <span class="order-info-label">订单状态：</span>
+                                <span class="order-info-value">
+                                    <span class="badge" id="orderStatus">-</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="order-info-section">
+                            <div class="order-info-item">
+                                <span class="order-info-label">收货人：</span>
+                                <span class="order-info-value" id="receiverName">-</span>
+                            </div>
+                            <div class="order-info-item">
+                                <span class="order-info-label">联系电话：</span>
+                                <span class="order-info-value" id="receiverPhone">-</span>
+                            </div>
+                            <div class="order-info-item">
+                                <span class="order-info-label">收货地址：</span>
+                                <span class="order-info-value" id="receiverAddress">-</span>
+                            </div>
+                            <div class="order-info-item">
+                                <span class="order-info-label">总金额：</span>
+                                <span class="order-info-value" id="totalAmount">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 订单商品列表 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">订单商品</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>商品名称</th>
+                                <th>商品编码</th>
+                                <th>数量</th>
+                                <th>单价</th>
+                                <th>小计</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderItems">
+                            <!-- 商品数据将通过AJAX加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 配送状态时间轴 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">配送状态</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline" id="deliveryTimeline">
+                    <!-- 时间轴数据将通过AJAX加载 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入通用JS -->
+    <script src="../common.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 清除localStorage中的用户信息
+                localStorage.removeItem('userInfo');
+                // 调用退出登录API
+                $.ajax({
+                    url: '/api/logout',
+                    type: 'POST',
+                    success: function(response) {
+                        // 退出成功，跳转到登录页面
+                        window.location.href = '../login.html';
+                    },
+                    error: function(xhr, status, error) {
+                        // 退出失败，直接跳转到登录页面
+                        window.location.href = '../login.html';
+                    }
+                });
+            });
+            
+            // 获取URL参数中的订单ID
+            function getOrderIdFromUrl() {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get('id');
+            }
+            
+            // 加载订单详情
+            function loadOrderDetail() {
+                const orderId = getOrderIdFromUrl();
+                if (!orderId) {
+                    alert('订单ID无效');
+                    window.location.href = 'order.html';
+                    return;
+                }
+                
+                $.ajax({
+                    url: `/api/customer/orders/${orderId}`,
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const order = response.data;
+                            
+                            // 更新订单基本信息
+                            $('#orderNumber').text(order.orderNumber);
+                            $('#createTime').text(order.createTime);
+                            $('#deliveryMethod').text(order.deliveryMethod);
+                            
+                            // 更新订单状态
+                            const statusText = getOrderStatusText(order.status);
+                            const statusClass = getOrderStatusClass(order.status);
+                            $('#orderStatus').text(statusText).removeClass().addClass(`badge bg-${statusClass}`);
+                            
+                            // 更新收货人信息
+                            $('#receiverName').text(order.receiverName);
+                            $('#receiverPhone').text(order.receiverPhone);
+                            $('#receiverAddress').text(order.receiverAddress);
+                            $('#totalAmount').text(`¥${order.totalAmount}`);
+                            
+                            // 更新商品列表
+                            const tbody = $('#orderItems');
+                            tbody.empty();
+                            
+                            order.items.forEach(item => {
+                                const row = `
+                                    <tr>
+                                        <td>${item.productName}</td>
+                                        <td>${item.productCode || '-'}</td>
+                                        <td>${item.quantity}</td>
+                                        <td>¥${item.price}</td>
+                                        <td>¥${(item.quantity * item.price).toFixed(2)}</td>
+                                    </tr>
+                                `;
+                                tbody.append(row);
+                            });
+                            
+                            // 更新配送状态时间轴
+                            updateDeliveryTimeline(order.status);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载订单详情失败:', error);
+                        alert('加载订单详情失败，请重试');
+                    }
+                });
+            }
+            
+            // 获取订单状态文本
+            function getOrderStatusText(status) {
+                const statusMap = {
+                    'PENDING': '待处理',
+                    'APPROVED': '已审核',
+                    'ASSIGNED': '已发货',
+                    'SHIPPED': '已发货',
+                    'DELIVERING': '配送中',
+                    'COMPLETED': '已完成',
+                    'CANCELLED': '已取消',
+                    'FAILED': '配送失败'
+                };
+                return statusMap[status] || '未知状态';
+            }
+            
+            // 获取订单状态样式类
+            function getOrderStatusClass(status) {
+                const classMap = {
+                    'PENDING': 'warning',
+                    'APPROVED': 'info',
+                    'ASSIGNED': 'info',
+                    'SHIPPED': 'info',
+                    'DELIVERING': 'primary',
+                    'COMPLETED': 'success',
+                    'CANCELLED': 'danger',
+                    'FAILED': 'danger'
+                };
+                return classMap[status] || 'secondary';
+            }
+            
+            // 更新配送状态时间轴
+            function updateDeliveryTimeline(currentStatus) {
+                const timeline = $('#deliveryTimeline');
+                timeline.empty();
+                
+                // 统一处理已分配和已发货状态
+                let displayStatus = currentStatus;
+                if (currentStatus === 'ASSIGNED') {
+                    displayStatus = 'SHIPPED';
+                }
+                
+                // 定义所有可能的状态节点，移除时间字段
+                const statusNodes = [
+                    { status: 'PENDING', text: '订单已提交' },
+                    { status: 'SHIPPED', text: '订单已发货' },
+                    { status: 'DELIVERING', text: '配送员正在配送' },
+                    { status: 'COMPLETED', text: '订单已完成' }
+                ];
+                
+                // 根据当前状态决定显示哪些节点
+                const statusOrder = ['PENDING', 'SHIPPED', 'DELIVERING', 'COMPLETED'];
+                const currentIndex = statusOrder.indexOf(displayStatus);
+                
+                statusNodes.forEach((node, index) => {
+                    const isCompleted = index <= currentIndex;
+                    const isCurrent = index === currentIndex;
+                    
+                    const timelineItem = $('<div class="timeline-item"></div>');
+                    if (isCompleted) {
+                        timelineItem.addClass('completed');
+                    } else {
+                        timelineItem.addClass('pending');
+                    }
+                    
+                    // 只添加内容元素，不添加时间元素
+                    const contentElement = $('<div class="timeline-content"></div>').text(node.text);
+                    
+                    timelineItem.append(contentElement);
+                    timeline.append(timelineItem);
+                });
+            }
+            
+            // 初始化页面数据
+            loadOrderDetail();
+        });
+    </script>
+</body>
+</html>

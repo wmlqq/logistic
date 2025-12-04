@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统设置 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">系统管理员中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="user-management.html"><i class="fa fa-users"></i> 用户管理</a></li>
+            <li><a href="system-settings.html" class="active"><i class="fa fa-cog"></i> 系统设置</a></li>
+            <li><a href="operation-log.html"><i class="fa fa-history"></i> 操作日志</a></li>
+            <li><a href="backup-restore.html"><i class="fa fa-database"></i> 数据备份恢复</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">系统设置</h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 系统设置卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">系统基本设置</h5>
+            </div>
+            <div class="card-body">
+                <form id="systemSettingsForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="systemName" class="form-label">系统名称</label>
+                                <input type="text" class="form-control" id="systemName" name="systemName" placeholder="请输入系统名称">
+                            </div>
+                            <div class="mb-3">
+                                <label for="systemVersion" class="form-label">系统版本</label>
+                                <input type="text" class="form-control" id="systemVersion" name="systemVersion" placeholder="请输入系统版本">
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactEmail" class="form-label">联系邮箱</label>
+                                <input type="email" class="form-control" id="contactEmail" name="contactEmail" placeholder="请输入联系邮箱">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="contactPhone" class="form-label">联系电话</label>
+                                <input type="tel" class="form-control" id="contactPhone" name="contactPhone" placeholder="请输入联系电话">
+                            </div>
+                            <div class="mb-3">
+                                <label for="maxLoginAttempts" class="form-label">最大登录尝试次数</label>
+                                <input type="number" class="form-control" id="maxLoginAttempts" name="maxLoginAttempts" placeholder="请输入最大登录尝试次数">
+                            </div>
+                            <div class="mb-3">
+                                <label for="sessionTimeout" class="form-label">会话超时时间（分钟）</label>
+                                <input type="number" class="form-control" id="sessionTimeout" name="sessionTimeout" placeholder="请输入会话超时时间">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save"></i> 保存设置
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入通用JS -->
+    <script src="../common.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 使用通用的退出登录函数
+                logout();
+            });
+            
+            // 加载系统设置
+            function loadSystemSettings() {
+                $.ajax({
+                    url: '/api/admin/system/settings',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const settings = response.data;
+                            $('#systemName').val(settings.systemName);
+                            $('#systemVersion').val(settings.systemVersion);
+                            $('#contactEmail').val(settings.contactEmail);
+                            $('#contactPhone').val(settings.contactPhone);
+                            $('#maxLoginAttempts').val(settings.maxLoginAttempts);
+                            $('#sessionTimeout').val(settings.sessionTimeout);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载系统设置失败:', error);
+                    }
+                });
+            }
+            
+            // 保存系统设置
+            $('#systemSettingsForm').submit(function(e) {
+                e.preventDefault();
+                
+                const settings = {
+                    systemName: $('#systemName').val(),
+                    systemVersion: $('#systemVersion').val(),
+                    contactEmail: $('#contactEmail').val(),
+                    contactPhone: $('#contactPhone').val(),
+                    maxLoginAttempts: $('#maxLoginAttempts').val(),
+                    sessionTimeout: $('#sessionTimeout').val()
+                };
+                
+                $.ajax({
+                    url: '/api/admin/system/settings',
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(settings),
+                    success: function(response) {
+                        if (response.code === 0) {
+                            alert('系统设置保存成功！');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('保存系统设置失败:', error);
+                        alert('系统设置保存失败！');
+                    }
+                });
+            });
+            
+            // 初始化页面
+            loadSystemSettings();
+        });
+    </script>
+</body>
+</html>

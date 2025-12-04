@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配送员详情 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        /* 统计卡片样式 */
+        .stat-card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-title {
+            font-size: 14px;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        /* 详情信息样式 */
+        .detail-info {
+            margin-bottom: 15px;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: var(--secondary-color);
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        /* 表格样式 */
+        .table {
+            color: var(--text-color);
+        }
+
+        .table th {
+            background-color: var(--light-color);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table td {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: var(--light-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">物流经理中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="order-management.html"><i class="fa fa-shopping-cart"></i> 订单管理</a></li>
+            <li><a href="delivery-management.html" class="active"><i class="fa fa-motorcycle"></i> 配送管理</a></li>
+            <li><a href="warehouse-management.html"><i class="fa fa-warehouse"></i> 仓库管理</a></li>
+            <li><a href="report.html"><i class="fa fa-bar-chart"></i> 报表分析</a></li>
+            <li><a href="profile.html"><i class="fa fa-user"></i> 个人资料</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">配送员详情</h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 返回按钮 -->
+        <div class="mb-4">
+            <a href="delivery-management.html" class="btn btn-secondary">
+                <i class="fa fa-arrow-left"></i> 返回配送管理
+            </a>
+        </div>
+
+        <!-- 配送员基本信息 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">基本信息</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="detail-info">
+                            <div class="detail-label">配送员ID</div>
+                            <div class="detail-value" id="deliveryManId"></div>
+                        </div>
+                        <div class="detail-info">
+                            <div class="detail-label">姓名</div>
+                            <div class="detail-value" id="name"></div>
+                        </div>
+                        <div class="detail-info">
+                            <div class="detail-label">手机号</div>
+                            <div class="detail-value" id="phone"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-info">
+                            <div class="detail-label">邮箱</div>
+                            <div class="detail-value" id="email"></div>
+                        </div>
+                        <div class="detail-info">
+                            <div class="detail-label">创建时间</div>
+                            <div class="detail-value" id="createTime"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务统计 -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa fa-clock-o"></i></div>
+                    <div class="stat-title">待配送任务</div>
+                    <div class="stat-value" id="pendingTasks">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa fa-motorcycle"></i></div>
+                    <div class="stat-title">配送中任务</div>
+                    <div class="stat-value" id="deliveringTasks">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa fa-check-circle"></i></div>
+                    <div class="stat-title">已完成任务</div>
+                    <div class="stat-value" id="completedTasks">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa fa-list"></i></div>
+                    <div class="stat-title">总任务数</div>
+                    <div class="stat-value" id="totalTasks">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">操作</h5>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-primary me-2" id="assignTaskBtn">
+                    <i class="fa fa-plus"></i> 分配任务
+                </button>
+                <button class="btn btn-secondary" id="viewTasksBtn">
+                    <i class="fa fa-eye"></i> 查看所有任务
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 查看所有任务模态框 -->
+    <div class="modal fade" id="tasksModal" tabindex="-1" aria-labelledby="tasksModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tasksModalLabel">配送员所有任务</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>订单编号</th>
+                                    <th>配送状态</th>
+                                    <th>预计送达时间</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tasksTableBody">
+                                <!-- 任务数据将通过JavaScript动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入通用JS -->
+    <script src="../common.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 清除localStorage中的用户信息
+                localStorage.removeItem('userInfo');
+                // 调用退出登录API
+                $.ajax({
+                    url: '/api/logout',
+                    type: 'POST',
+                    success: function(response) {
+                        // 退出成功，跳转到登录页面
+                        window.location.href = '../login.html';
+                    },
+                    error: function(xhr, status, error) {
+                        // 退出失败，直接跳转到登录页面
+                        window.location.href = '../login.html';
+                    }
+                });
+            });
+            
+            // 获取URL参数中的配送员ID
+            function getUrlParam(name) {
+                const reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+                const r = window.location.search.substr(1).match(reg);
+                if (r != null) return decodeURIComponent(r[2]);
+                return null;
+            }
+            
+            const deliveryManId = getUrlParam('id');
+            
+            if (!deliveryManId) {
+                alert('配送员ID不能为空');
+                window.location.href = 'delivery-management.html';
+                return;
+            }
+            
+            // 加载配送员详情
+            function loadDeliveryManDetail() {
+                $.ajax({
+                    url: `/api/manager/delivery/men/${deliveryManId}`,
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const deliveryMan = response.data;
+                            
+                            // 填充基本信息
+                            $('#deliveryManId').text(deliveryMan.deliveryManId);
+                            $('#name').text(deliveryMan.name);
+                            $('#phone').text(deliveryMan.phone);
+                            $('#email').text(deliveryMan.email || '未设置');
+                            $('#createTime').text(deliveryMan.createTime || '未知');
+                            
+                            // 填充任务统计
+                            $('#pendingTasks').text(deliveryMan.pendingTasks);
+                            $('#deliveringTasks').text(deliveryMan.deliveringTasks);
+                            $('#completedTasks').text(deliveryMan.completedTasks);
+                            $('#totalTasks').text(deliveryMan.totalTasks);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载配送员详情失败:', error);
+                        alert('加载配送员详情失败，请重试');
+                    }
+                });
+            }
+            
+            // 初始化页面数据
+            loadDeliveryManDetail();
+            
+            // 分配任务按钮点击事件
+            $('#assignTaskBtn').click(function() {
+                // 跳转到配送管理页面，方便分配任务
+                window.location.href = 'delivery-management.html';
+            });
+            
+            // 加载配送员所有任务
+            function loadDeliveryManTasks() {
+                $.ajax({
+                    url: `/api/manager/delivery/tasks?deliveryManId=${deliveryManId}`,
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const tasks = response.data.tasks;
+                            const tbody = $('#tasksTableBody');
+                            tbody.empty();
+                            
+                            tasks.forEach(task => {
+                                // 格式化任务状态
+                                let statusText = '';
+                                let statusClass = '';
+                                const status = task.status;
+                                switch (status) {
+                                    case 'PENDING':
+                                    case 'ASSIGNED':
+                                        statusText = '待配送';
+                                        statusClass = 'badge bg-warning';
+                                        break;
+                                    case 'DELIVERING':
+                                    case 'PICKED_UP':
+                                        statusText = '配送中';
+                                        statusClass = 'badge bg-primary';
+                                        break;
+                                    case 'COMPLETED':
+                                    case 'DELIVERED':
+                                        statusText = '已完成';
+                                        statusClass = 'badge bg-success';
+                                        break;
+                                    case 'CANCELLED':
+                                    case 'FAILED':
+                                        statusText = '已取消';
+                                        statusClass = 'badge bg-danger';
+                                        break;
+                                    default:
+                                        statusText = '未知状态';
+                                        statusClass = 'badge bg-secondary';
+                                }
+                                
+                                const row = `
+                                    <tr>
+                                        <td>${task.orderNumber}</td>
+                                        <td><span class="${statusClass}">${statusText}</span></td>
+                                        <td>${task.expectedDeliveryTime || '-'}</td>
+                                    </tr>
+                                `;
+                                tbody.append(row);
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载配送员任务失败:', error);
+                        alert('加载配送员任务失败，请重试');
+                    }
+                });
+            }
+            
+            // 查看所有任务按钮点击事件
+            $('#viewTasksBtn').click(function() {
+                // 打开模态框并加载任务数据
+                const tasksModal = new bootstrap.Modal('#tasksModal');
+                loadDeliveryManTasks();
+                tasksModal.show();
+            });
+        });
+    </script>
+</body>
+</html>

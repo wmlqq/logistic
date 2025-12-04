@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报表分析 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        /* 筛选区域 */
+        .filter-section {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 20px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">物流经理中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="order-management.html"><i class="fa fa-shopping-cart"></i> 订单管理</a></li>
+            <li><a href="delivery-management.html"><i class="fa fa-motorcycle"></i> 配送管理</a></li>
+            <li><a href="warehouse-management.html"><i class="fa fa-warehouse"></i> 仓库管理</a></li>
+            <li><a href="report.html" class="active"><i class="fa fa-bar-chart"></i> 报表分析</a></li>
+            <li><a href="profile.html"><i class="fa fa-user"></i> 个人资料</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">报表分析</h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 筛选区域 -->
+        <div class="filter-section">
+            <form id="reportFilterForm">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="startDate" class="form-label">开始日期</label>
+                            <input type="date" class="form-control" id="startDate" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="endDate" class="form-label">结束日期</label>
+                            <input type="date" class="form-control" id="endDate" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="reportType" class="form-label">报表类型</label>
+                            <select class="form-select" id="reportType" required>
+                                <option value="orders">订单报表</option>
+                                <option value="delivery-efficiency">配送效率报表</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">操作</label>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-search"></i> 生成报表
+                                </button>
+                                <button type="button" class="btn btn-secondary ms-2" id="exportBtn">
+                                    <i class="fa fa-download"></i> 导出报表
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 订单报表 -->
+        <div class="card" id="orderReportCard">
+            <div class="card-header">
+                <h5 class="card-title">订单报表</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="orderChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 配送效率报表 -->
+        <div class="card" id="deliveryEfficiencyCard" style="display: none;">
+            <div class="card-header">
+                <h5 class="card-title">配送效率报表</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="deliveryEfficiencyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入通用JS -->
+    <script src="../common.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 清除localStorage中的用户信息
+                localStorage.removeItem('userInfo');
+                // 调用退出登录API
+                $.ajax({
+                    url: '/api/logout',
+                    type: 'POST',
+                    success: function(response) {
+                        // 退出成功，跳转到登录页面
+                        window.location.href = '../login.html';
+                    },
+                    error: function(xhr, status, error) {
+                        // 退出失败，直接跳转到登录页面
+                        window.location.href = '../login.html';
+                    }
+                });
+            });
+            
+            // 设置默认日期范围（最近30天）
+            function setDefaultDateRange() {
+                const today = new Date();
+                const endDate = today.toISOString().split('T')[0];
+                const startDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                
+                $('#startDate').val(startDate);
+                $('#endDate').val(endDate);
+            }
+            
+            // 初始化订单图表
+            let orderChart = null;
+            function initOrderChart(data) {
+                const ctx = document.getElementById('orderChart').getContext('2d');
+                
+                if (orderChart) {
+                    orderChart.destroy();
+                }
+                
+                orderChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(item => item.date),
+                        datasets: [
+                            {
+                                label: '订单数量',
+                                data: data.map(item => item.orderCount),
+                                borderColor: '#0d6efd',
+                                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                                tension: 0.1,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: '订单金额',
+                                data: data.map(item => item.totalAmount),
+                                borderColor: '#198754',
+                                backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                                tension: 0.1,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: '订单数量'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: '订单金额 (元)'
+                                },
+                                grid: {
+                                    drawOnChartArea: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 初始化配送效率图表
+            let deliveryEfficiencyChart = null;
+            function initDeliveryEfficiencyChart(data) {
+                const ctx = document.getElementById('deliveryEfficiencyChart').getContext('2d');
+                
+                if (deliveryEfficiencyChart) {
+                    deliveryEfficiencyChart.destroy();
+                }
+                
+                deliveryEfficiencyChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(item => item.deliveryName),
+                        datasets: [
+                            {
+                                label: '完成任务数',
+                                data: data.map(item => item.completedTasks),
+                                backgroundColor: '#0d6efd'
+                            },
+                            {
+                                label: '配送效率 (%)',
+                                data: data.map(item => item.efficiency),
+                                backgroundColor: '#198754',
+                                type: 'line',
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: '完成任务数'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: '配送效率 (%)'
+                                },
+                                grid: {
+                                    drawOnChartArea: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 加载订单报表数据
+            function loadOrderReport(startDate, endDate) {
+                $.ajax({
+                    url: '/api/manager/reports/orders',
+                    type: 'GET',
+                    data: {
+                        startDate: startDate,
+                        endDate: endDate
+                    },
+                    success: function(response) {
+                        if (response.code === 0) {
+                            initOrderChart(response.data);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载订单报表失败:', error);
+                    }
+                });
+            }
+            
+            // 加载配送效率报表数据
+            function loadDeliveryEfficiencyReport(startDate, endDate) {
+                $.ajax({
+                    url: '/api/manager/reports/delivery-efficiency',
+                    type: 'GET',
+                    data: {
+                        startDate: startDate,
+                        endDate: endDate
+                    },
+                    success: function(response) {
+                        if (response.code === 0) {
+                            initDeliveryEfficiencyChart(response.data);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载配送效率报表失败:', error);
+                    }
+                });
+            }
+            
+            // 生成报表
+            $('#reportFilterForm').submit(function(e) {
+                e.preventDefault();
+                
+                const startDate = $('#startDate').val();
+                const endDate = $('#endDate').val();
+                const reportType = $('#reportType').val();
+                
+                if (reportType === 'orders') {
+                    $('#orderReportCard').show();
+                    $('#deliveryEfficiencyCard').hide();
+                    loadOrderReport(startDate, endDate);
+                } else if (reportType === 'delivery-efficiency') {
+                    $('#orderReportCard').hide();
+                    $('#deliveryEfficiencyCard').show();
+                    loadDeliveryEfficiencyReport(startDate, endDate);
+                }
+            });
+            
+            // 导出报表
+            $('#exportBtn').click(function() {
+                const startDate = $('#startDate').val();
+                const endDate = $('#endDate').val();
+                const reportType = $('#reportType').val();
+                
+                // 构建导出URL
+                let exportUrl = '';
+                if (reportType === 'orders') {
+                    exportUrl = `/api/manager/reports/orders/export?startDate=${startDate}&endDate=${endDate}`;
+                } else if (reportType === 'delivery-efficiency') {
+                    exportUrl = `/api/manager/reports/delivery-efficiency/export?startDate=${startDate}&endDate=${endDate}`;
+                }
+                
+                // 触发下载
+                window.open(exportUrl, '_blank');
+            });
+            
+            // 初始化页面
+            setDefaultDateRange();
+            loadOrderReport($('#startDate').val(), $('#endDate').val());
+        });
+    </script>
+</body>
+</html>

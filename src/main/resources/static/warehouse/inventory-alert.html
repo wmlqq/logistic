@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>库存预警 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        /* 表格样式 */
+        .table {
+            color: var(--text-color);
+        }
+
+        .table th {
+            background-color: var(--light-color);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table td {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* 预警卡片样式 */
+        .alert-card {
+            border-left: 4px solid var(--danger-color);
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: rgba(220, 53, 69, 0.1);
+            border-radius: 8px;
+        }
+
+        .alert-card h6 {
+            margin: 0 0 10px 0;
+            color: var(--danger-color);
+        }
+
+        .alert-card .alert-meta {
+            font-size: 14px;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">仓库管理员中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="inventory.html"><i class="fa fa-cubes"></i> 库存管理</a></li>
+            <li><a href="inventory-alert.html" class="active"><i class="fa fa-exclamation-triangle"></i> 库存预警</a></li>
+            <li><a href="stock-import-export.html"><i class="fa fa-file-excel-o"></i> 库存导入导出</a></li>
+            <li><a href="warehouse-location.html"><i class="fa fa-map-marker"></i> 仓库位置管理</a></li>
+            <li><a href="profile.html"><i class="fa fa-user"></i> 个人资料</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">库存预警</h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 预警统计 -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card stats-card text-center">
+                    <div class="card-body">
+                        <div class="stats-number" id="totalAlerts">0</div>
+                        <div class="stats-label">预警商品总数</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card text-center">
+                    <div class="card-body">
+                        <div class="stats-number" id="criticalAlerts">0</div>
+                        <div class="stats-label">严重预警商品</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card text-center">
+                    <div class="card-body">
+                        <div class="stats-number" id="normalAlerts">0</div>
+                        <div class="stats-label">一般预警商品</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 低库存预警列表 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">低库存预警商品</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>商品名称</th>
+                                <th>商品编码</th>
+                                <th>当前库存</th>
+                                <th>预警阈值</th>
+                                <th>库存不足量</th>
+                                <th>仓库位置</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lowStockAlerts">
+                            <!-- 低库存预警数据将通过AJAX加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 补货模态框 -->
+    <div class="modal fade" id="replenishModal" tabindex="-1" aria-labelledby="replenishModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="replenishModalLabel">商品补货</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="replenishForm">
+                        <input type="hidden" id="replenishProductId">
+                        <div class="mb-3">
+                            <label for="replenishProductName" class="form-label">商品名称</label>
+                            <input type="text" class="form-control" id="replenishProductName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="replenishCurrentStock" class="form-label">当前库存</label>
+                            <input type="number" class="form-control" id="replenishCurrentStock" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="replenishAlertThreshold" class="form-label">预警阈值</label>
+                            <input type="number" class="form-control" id="replenishAlertThreshold" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="replenishQuantity" class="form-label">补货数量</label>
+                            <input type="number" class="form-control" id="replenishQuantity" required min="1">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="confirmReplenishBtn">确认补货</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入通用JS -->
+    <script src="../common.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 调用退出登录API
+                $.ajax({
+                    url: '/api/logout',
+                    type: 'POST',
+                    success: function(response) {
+                        // 退出成功，跳转到登录页面
+                        window.location.href = '../login.html';
+                    },
+                    error: function(xhr, status, error) {
+                        // 退出失败，直接跳转到登录页面
+                        window.location.href = '../login.html';
+                    }
+                });
+            });
+            
+            // 加载低库存预警数据
+            function loadLowStockAlerts() {
+                $.ajax({
+                    url: '/api/warehouse/stock/alerts',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const alerts = response.data;
+                            const tbody = $('#lowStockAlerts');
+                            tbody.empty();
+                            
+                            // 更新统计数据
+                            $('#totalAlerts').text(alerts.length);
+                            
+                            // 计算严重预警和一般预警数量
+                            const criticalAlerts = alerts.filter(alert => alert.currentStock === 0).length;
+                            const normalAlerts = alerts.length - criticalAlerts;
+                            $('#criticalAlerts').text(criticalAlerts);
+                            $('#normalAlerts').text(normalAlerts);
+                            
+                            alerts.forEach(alert => {
+                                const shortage = alert.alertThreshold - alert.currentStock;
+                                const row = `
+                                    <tr>
+                                        <td>${alert.productName}</td>
+                                        <td>${alert.productCode || 'N/A'}</td>
+                                        <td>${alert.currentStock}</td>
+                                        <td>${alert.alertThreshold}</td>
+                                        <td>${shortage}</td>
+                                        <td>${alert.warehouseLocation || '未分配'}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary replenish-btn" 
+                                                    data-id="${alert.productId}" 
+                                                    data-name="${alert.productName}" 
+                                                    data-stock="${alert.currentStock}" 
+                                                    data-threshold="${alert.alertThreshold}">
+                                                <i class="fa fa-plus"></i> 补货
+                                            </button>
+                                            <a href="inventory.html?productId=${alert.productId}" class="btn btn-sm btn-info">
+                                                <i class="fa fa-eye"></i> 查看详情
+                                            </a>
+                                        </td>
+                                    </tr>
+                                `;
+                                tbody.append(row);
+                            });
+                            
+                            // 绑定补货按钮事件
+                            $('.replenish-btn').click(function() {
+                                const productId = $(this).data('id');
+                                const productName = $(this).data('name');
+                                const currentStock = $(this).data('stock');
+                                const alertThreshold = $(this).data('threshold');
+                                
+                                // 填充模态框数据
+                                $('#replenishProductId').val(productId);
+                                $('#replenishProductName').val(productName);
+                                $('#replenishCurrentStock').val(currentStock);
+                                $('#replenishAlertThreshold').val(alertThreshold);
+                                
+                                // 计算建议补货数量
+                                const suggestedQuantity = alertThreshold * 2 - currentStock;
+                                $('#replenishQuantity').val(suggestedQuantity);
+                                
+                                // 显示模态框
+                                const modal = new bootstrap.Modal($('#replenishModal'));
+                                modal.show();
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载低库存预警失败:', error);
+                    }
+                });
+            }
+            
+            // 确认补货
+            $('#confirmReplenishBtn').click(function() {
+                const productId = $('#replenishProductId').val();
+                const replenishQuantity = parseInt($('#replenishQuantity').val());
+                
+                $.ajax({
+                    url: `/api/warehouse/inventory/${productId}/adjust`,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        quantity: replenishQuantity,
+                        type: 'IN'
+                    }),
+                    success: function(response) {
+                        if (response.code === 0) {
+                            // 补货成功，关闭模态框并刷新数据
+                            const modal = bootstrap.Modal.getInstance($('#replenishModal'));
+                            modal.hide();
+                            loadLowStockAlerts();
+                            
+                            // 显示成功提示
+                            alert('补货成功！');
+                        } else {
+                            // 显示失败提示
+                            alert('补货失败：' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('补货失败:', error);
+                        alert('补货失败，请重试！');
+                    }
+                });
+            });
+            
+            // 初始化加载数据
+            loadLowStockAlerts();
+        });
+    </script>
+</body>
+</html>

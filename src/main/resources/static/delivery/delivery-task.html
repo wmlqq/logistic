@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配送任务 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        /* 表格样式 */
+        .table {
+            color: var(--text-color);
+        }
+
+        .table th {
+            background-color: var(--light-color);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table td {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">配送员中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="delivery-task.html" class="active"><i class="fa fa-tasks"></i> 配送任务</a></li>
+            <li><a href="route-plan.html"><i class="fa fa-map"></i> 路线规划</a></li>
+            <li><a href="profile.html"><i class="fa fa-user"></i> 个人资料</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">配送任务</h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 任务详情 -->
+        <div class="card" id="taskDetailCard" style="display: none;">
+            <div class="card-header">
+                <h5 class="card-title">任务详情</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label"><strong>任务ID:</strong></label>
+                            <span id="taskId"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><strong>订单编号:</strong></label>
+                            <span id="orderNumber"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><strong>收货人:</strong></label>
+                            <span id="receiverName"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><strong>联系电话:</strong></label>
+                            <span id="receiverPhone"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label"><strong>收货地址:</strong></label>
+                            <span id="receiverAddress"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><strong>配送状态:</strong></label>
+                            <span id="deliveryStatus"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><strong>预计送达时间:</strong></label>
+                            <div class="input-group">
+                                <input type="datetime-local" class="form-control" id="expectedDeliveryTimeInput" style="display: none;">
+                                <span id="expectedDeliveryTime"></span>
+                                <button class="btn btn-sm btn-primary" id="editExpectedTimeBtn" style="display: none;">
+                                    <i class="fa fa-pencil"></i> 编辑
+                                </button>
+                                <button class="btn btn-sm btn-success" id="saveExpectedTimeBtn" style="display: none;">
+                                    <i class="fa fa-save"></i> 保存
+                                </button>
+                                <button class="btn btn-sm btn-secondary" id="cancelExpectedTimeBtn" style="display: none;">
+                                    <i class="fa fa-times"></i> 取消
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><strong>实际送达时间:</strong></label>
+                            <span id="actualDeliveryTime"></span>
+                        </div>
+                    </div>
+                </div>
+                <!-- 商品信息已隐藏 -->
+                <div class="mt-4">
+                    <button class="btn btn-primary me-2" id="startDeliveryBtn" style="display: none;">
+                        <i class="fa fa-play"></i> 开始配送
+                    </button>
+                    <button class="btn btn-success me-2" id="completeDeliveryBtn" style="display: none;">
+                        <i class="fa fa-check"></i> 完成配送
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.location.href='delivery-task.html'">
+                        <i class="fa fa-arrow-left"></i> 返回列表
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务列表 -->
+        <div class="card" id="taskListCard">
+            <div class="card-header">
+                <h5 class="card-title">任务列表</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>任务ID</th>
+                                <th>订单编号</th>
+                                <th>收货人</th>
+                                <th>收货地址</th>
+                                <th>配送状态</th>
+                                <th>预计送达时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskList">
+                            <!-- 任务数据将通过AJAX加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入通用JS -->
+    <script src="../common.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 从localStorage获取用户信息
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            
+            // 更新用户名称
+            if (userInfo) {
+                $('.user-name').text(userInfo.username);
+            }
+            
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 调用退出登录API
+                $.ajax({
+                    url: '/api/logout',
+                    type: 'POST',
+                    success: function(response) {
+                        // 退出成功，跳转到登录页面
+                        window.location.href = '../login.html';
+                    },
+                    error: function(xhr, status, error) {
+                        // 退出失败，直接跳转到登录页面
+                        window.location.href = '../login.html';
+                    }
+                });
+            });
+            
+            // 解析URL参数
+            function getUrlParam(name) {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(name);
+            }
+            
+            // 获取配送状态文本
+            function getDeliveryStatusText(status) {
+                const statusMap = {
+                    'PENDING': '待配送',
+                    'PICKED_UP': '已取货',
+                    'DELIVERING': '配送中',
+                    'COMPLETED': '已完成',
+                    'FAILED': '配送失败'
+                };
+                return statusMap[status] || '未知状态';
+            }
+            
+            // 获取配送状态样式类
+            function getDeliveryStatusClass(status) {
+                const classMap = {
+                    'PENDING': 'warning',
+                    'PICKED_UP': 'info',
+                    'DELIVERING': 'primary',
+                    'COMPLETED': 'success',
+                    'FAILED': 'danger'
+                };
+                return classMap[status] || 'secondary';
+            }
+            
+            // 加载任务列表
+            function loadTaskList() {
+                $.ajax({
+                    url: '/api/delivery/tasks',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const tasks = response.data;
+                            const tbody = $('#taskList');
+                            tbody.empty();
+                            
+                            tasks.forEach(task => {
+                                const statusText = getDeliveryStatusText(task.status);
+                                const statusClass = getDeliveryStatusClass(task.status);
+                                
+                                // 格式化预计送达时间
+                                const expectedTime = task.expectedDeliveryTime ? new Date(task.expectedDeliveryTime).toLocaleString('zh-CN') : '未设置';
+                                
+                                const row = `
+                                    <tr>
+                                        <td>${task.taskId}</td>
+                                        <td>${task.orderNumber}</td>
+                                        <td>${task.receiverName}</td>
+                                        <td>${task.receiverAddress}</td>
+                                        <td><span class="badge bg-${statusClass}">${statusText}</span></td>
+                                        <td>${expectedTime}</td>
+                                        <td>
+                                            <a href="delivery-task.html?id=${task.taskId}" class="btn btn-sm btn-primary">
+                                                <i class="fa fa-eye"></i> 查看详情
+                                            </a>
+                                        </td>
+                                    </tr>
+                                `;
+                                tbody.append(row);
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载任务列表失败:', error);
+                    }
+                });
+            }
+            
+            // 加载任务详情
+            function loadTaskDetail(taskId) {
+                $.ajax({
+                    url: `/api/delivery/task/${taskId}`,
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const task = response.data;
+                            
+                            // 显示任务详情卡片，隐藏列表卡片
+                            $('#taskListCard').hide();
+                            $('#taskDetailCard').show();
+                            
+                            // 填充任务详情
+                            $('#taskId').text(task.taskId);
+                            $('#orderNumber').text(task.orderNumber);
+                            $('#receiverName').text(task.receiverName);
+                            $('#receiverPhone').text(task.receiverPhone);
+                            $('#receiverAddress').text(task.receiverAddress);
+                            
+                            const statusText = getDeliveryStatusText(task.status);
+                            const statusClass = getDeliveryStatusClass(task.status);
+                            $('#deliveryStatus').html(`<span class="badge bg-${statusClass}">${statusText}</span>`);
+                            
+                            // 格式化预计送达时间
+                            const expectedTime = task.expectedDeliveryTime ? new Date(task.expectedDeliveryTime).toLocaleString('zh-CN') : '未设置';
+                            const actualTime = task.actualDeliveryTime ? new Date(task.actualDeliveryTime).toLocaleString('zh-CN') : '未送达';
+                            
+                            $('#expectedDeliveryTime').text(expectedTime);
+                            $('#actualDeliveryTime').text(actualTime);
+                            
+                            // 填充商品信息
+                            const productList = $('#productList');
+                            productList.empty();
+                            task.products.forEach(product => {
+                                const productRow = `
+                                    <tr>
+                                        <td>${product.productName}</td>
+                                        <td>${product.quantity}</td>
+                                        <td>${product.specification}</td>
+                                    </tr>
+                                `;
+                                productList.append(productRow);
+                            });
+                            
+                            // 显示/隐藏操作按钮
+                            $('#startDeliveryBtn').hide();
+                            $('#completeDeliveryBtn').hide();
+                            
+                            if (task.status === 'PENDING') {
+                                $('#startDeliveryBtn').show();
+                            } else if (task.status === 'DELIVERING') {
+                                $('#completeDeliveryBtn').show();
+                            }
+                            
+                            // 显示/隐藏预计送达时间编辑按钮
+                            $('#editExpectedTimeBtn').hide();
+                            $('#expectedDeliveryTimeInput').hide();
+                            $('#saveExpectedTimeBtn').hide();
+                            $('#cancelExpectedTimeBtn').hide();
+                            $('#expectedDeliveryTime').show();
+                            
+                            if (task.status === 'PENDING' || task.status === 'DELIVERING') {
+                                $('#editExpectedTimeBtn').show();
+                            }
+                            
+                            // 绑定按钮事件
+                            $('#startDeliveryBtn').off('click').on('click', function() {
+                                startDelivery(taskId);
+                            });
+                            
+                            $('#completeDeliveryBtn').off('click').on('click', function() {
+                                completeDelivery(taskId);
+                            });
+                            
+                            // 编辑预计送达时间
+                            $('#editExpectedTimeBtn').off('click').on('click', function() {
+                                // 隐藏文本显示，显示输入框
+                                $('#expectedDeliveryTime').hide();
+                                $('#editExpectedTimeBtn').hide();
+                                $('#expectedDeliveryTimeInput').show();
+                                $('#saveExpectedTimeBtn').show();
+                                $('#cancelExpectedTimeBtn').show();
+                                
+                                // 设置当前时间为默认值
+                                const now = new Date();
+                                const formattedDate = now.toISOString().slice(0, 16);
+                                $('#expectedDeliveryTimeInput').val(formattedDate);
+                            });
+                            
+                            // 保存预计送达时间
+                            $('#saveExpectedTimeBtn').off('click').on('click', function() {
+                                const expectedTime = $('#expectedDeliveryTimeInput').val();
+                                if (!expectedTime) {
+                                    alert('请选择预计送达时间');
+                                    return;
+                                }
+                                
+                                // 转换为yyyy-MM-dd HH:mm:ss格式
+                                const formattedTime = expectedTime.replace('T', ' ');
+                                
+                                // 调用API保存预计送达时间
+                                $.ajax({
+                                    url: `/api/delivery/task/${taskId}/expected-time`,
+                                    type: 'PUT',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify({ expectedDeliveryTime: formattedTime }),
+                                    success: function(response) {
+                                        if (response.code === 0) {
+                                            alert('预计送达时间保存成功');
+                                            // 刷新任务详情
+                                            loadTaskDetail(taskId);
+                                        } else {
+                                            alert('预计送达时间保存失败：' + response.message);
+                                        }
+                                    },
+                                    error: function(xhr, status, error) {
+                                        alert('预计送达时间保存失败：' + error);
+                                    }
+                                });
+                            });
+                            
+                            // 取消编辑预计送达时间
+                            $('#cancelExpectedTimeBtn').off('click').on('click', function() {
+                                // 显示文本，隐藏输入框
+                                $('#expectedDeliveryTime').show();
+                                $('#editExpectedTimeBtn').show();
+                                $('#expectedDeliveryTimeInput').hide();
+                                $('#saveExpectedTimeBtn').hide();
+                                $('#cancelExpectedTimeBtn').hide();
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载任务详情失败:', error);
+                    }
+                });
+            }
+            
+            // 开始配送
+            function startDelivery(taskId) {
+                $.ajax({
+                    url: `/api/delivery/task/${taskId}/start`,
+                    type: 'PUT',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            alert('开始配送成功');
+                            loadTaskDetail(taskId);
+                        } else {
+                            alert('开始配送失败：' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('开始配送失败：' + error);
+                    }
+                });
+            }
+            
+            // 完成配送
+            function completeDelivery(taskId) {
+                $.ajax({
+                    url: `/api/delivery/task/${taskId}/complete`,
+                    type: 'PUT',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            alert('配送完成成功');
+                            loadTaskDetail(taskId);
+                        } else {
+                            alert('配送完成失败：' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('配送完成失败：' + error);
+                    }
+                });
+            }
+            
+            // 初始化页面
+            const taskId = getUrlParam('id');
+            if (taskId) {
+                // 如果有任务ID参数，加载任务详情
+                loadTaskDetail(taskId);
+            } else {
+                // 否则加载任务列表
+                loadTaskList();
+            }
+        });
+    </script>
+</body>
+</html>

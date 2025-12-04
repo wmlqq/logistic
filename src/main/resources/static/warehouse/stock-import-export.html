@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>库存导入导出 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        /* 导入导出区域样式 */
+        .import-export-section {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .import-section, .export-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        /* 文件上传样式 */
+        .file-upload {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+
+        .file-upload i {
+            font-size: 48px;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .file-upload p {
+            margin: 0;
+            color: var(--secondary-color);
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">仓库管理员中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="inventory.html"><i class="fa fa-cubes"></i> 库存管理</a></li>
+            <li><a href="inventory-alert.html"><i class="fa fa-exclamation-triangle"></i> 库存预警</a></li>
+            <li><a href="stock-import-export.html" class="active"><i class="fa fa-file-excel-o"></i> 库存导入导出</a></li>
+            <li><a href="warehouse-location.html"><i class="fa fa-map-marker"></i> 仓库位置管理</a></li>
+            <li><a href="profile.html"><i class="fa fa-user"></i> 个人资料</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">库存导入导出</h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 导入导出区域 -->
+        <div class="import-export-section">
+            <!-- 导入区域 -->
+            <div class="import-section card">
+                <div class="card-header">
+                    <h5 class="card-title">库存导入</h5>
+                </div>
+                <div class="card-body">
+                    <div class="file-upload" id="fileUpload">
+                        <i class="fa fa-cloud-upload"></i>
+                        <p>点击此处上传</p>
+                        <p class="small">支持 Excel 文件 (.xlsx, .xls)</p>
+                        <input type="file" id="excelFile" accept=".xlsx, .xls">
+                    </div>
+                    <div id="fileInfo" style="display: none; margin-bottom: 20px;">
+                        <div class="alert alert-info" role="alert">
+                            <i class="fa fa-file-excel-o"></i> <span id="fileName"></span>
+                            <button type="button" class="btn-close float-end" id="removeFile"></button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <a href="#" class="btn btn-secondary" id="downloadTemplate">
+                            <i class="fa fa-download"></i> 下载导入模板
+                        </a>
+                    </div>
+                    <button class="btn btn-primary w-100" id="importBtn" disabled>
+                        <i class="fa fa-upload"></i> 开始导入
+                    </button>
+                </div>
+            </div>
+
+            <!-- 导出区域 -->
+            <div class="export-section card">
+                <div class="card-header">
+                    <h5 class="card-title">库存导出</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="exportFormat" class="form-label">导出格式</label>
+                        <select class="form-select" id="exportFormat">
+                            <option value="excel">Excel (.xlsx)</option>
+                            <option value="csv">CSV (.csv)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exportScope" class="form-label">导出范围</label>
+                        <select class="form-select" id="exportScope">
+                            <option value="all">全部库存</option>
+                            <option value="low-stock">低库存商品</option>
+                            <option value="available">可用商品</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary w-100" id="exportBtn">
+                        <i class="fa fa-download"></i> 开始导出
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入通用JS -->
+    <script src="../common.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 调用退出登录API
+                $.ajax({
+                    url: '/api/logout',
+                    type: 'POST',
+                    success: function(response) {
+                        // 退出成功，跳转到登录页面
+                        window.location.href = '../login.html';
+                    },
+                    error: function(xhr, status, error) {
+                        // 退出失败，直接跳转到登录页面
+                        window.location.href = '../login.html';
+                    }
+                });
+            });
+            
+            // 文件上传区域点击事件
+            $('#fileUpload').click(function(e) {
+                // 检查点击目标是否不是文件输入框本身，防止无限递归
+                if (e.target.id !== 'excelFile') {
+                    $('#excelFile').click();
+                }
+            });
+            
+            // 文件选择事件
+            $('#excelFile').change(function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    $('#fileName').text(file.name);
+                    $('#fileInfo').show();
+                    $('#importBtn').prop('disabled', false);
+                }
+            });
+            
+            // 移除文件事件
+            $('#removeFile').click(function() {
+                $('#excelFile').val('');
+                $('#fileInfo').hide();
+                $('#importBtn').prop('disabled', true);
+            });
+            
+            // 下载模板事件
+            $('#downloadTemplate').click(function(e) {
+                e.preventDefault();
+                // 调用下载模板API
+                window.location.href = '/api/warehouse/inventory/export/template';
+            });
+            
+            // 导入按钮事件
+            $('#importBtn').click(function() {
+                const file = $('#excelFile')[0].files[0];
+                if (!file) {
+                    alert('请选择要导入的文件');
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                $.ajax({
+                    url: '/api/warehouse/inventory/import',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {
+                        $('#importBtn').html('<i class="fa fa-spinner fa-spin"></i> 导入中...').prop('disabled', true);
+                    },
+                    success: function(response) {
+                        if (response.code === 0) {
+                            alert('导入成功！');
+                            // 重置表单
+                            $('#excelFile').val('');
+                            $('#fileInfo').hide();
+                            $('#importBtn').html('<i class="fa fa-upload"></i> 开始导入').prop('disabled', true);
+                        } else {
+                            alert('导入失败：' + (response.message || '未知错误'));
+                            $('#importBtn').html('<i class="fa fa-upload"></i> 开始导入').prop('disabled', false);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('导入失败:', error);
+                        alert('导入失败，请重试！');
+                        $('#importBtn').html('<i class="fa fa-upload"></i> 开始导入').prop('disabled', false);
+                    }
+                });
+            });
+            
+            // 导出按钮事件
+            $('#exportBtn').click(function() {
+                const format = $('#exportFormat').val();
+                const scope = $('#exportScope').val();
+                
+                // 调用导出API
+                window.location.href = `/api/warehouse/inventory/export?format=${format}&scope=${scope}`;
+            });
+        });
+    </script>
+</body>
+</html>

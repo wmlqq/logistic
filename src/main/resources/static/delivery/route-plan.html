@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>路线规划 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 功能开发中样式 */
+        .feature-dev {
+            text-align: center;
+            padding: 50px 0;
+        }
+
+        .feature-dev i {
+            font-size: 64px;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+
+        .feature-dev h3 {
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+
+        .feature-dev p {
+            color: var(--secondary-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">配送员中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="delivery-task.html"><i class="fa fa-tasks"></i> 配送任务</a></li>
+            <li><a href="route-plan.html" class="active"><i class="fa fa-map"></i> 路线规划</a></li>
+            <li><a href="profile.html"><i class="fa fa-user"></i> 个人资料</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">路线规划</h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 路线规划功能 -->
+        <div class="row">
+            <!-- 左侧控制面板 -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title">任务选择</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="taskSelect" class="form-label">选择配送任务</label>
+                            <select class="form-select" id="taskSelect">
+                                <!-- 任务数据将通过AJAX加载 -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title">当前位置</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary flex-grow-1" id="getLocationBtn">
+                                    <i class="fa fa-map-marker"></i> 获取当前位置
+                                </button>
+                                <button class="btn btn-secondary" id="refreshLocationBtn">
+                                    <i class="fa fa-refresh"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="currentLocation" class="form-label">或手动输入</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="currentLocation" placeholder="请输入当前位置">
+                                <button class="btn btn-primary" type="button" id="searchCurrentLocationBtn">
+                                    <i class="fa fa-search"></i> 搜索
+                                </button>
+                            </div>
+                        </div>
+                        <div id="locationError" class="text-danger mb-3" style="display: none;"></div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title">目标位置</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="destination" class="form-label">目标地址</label>
+                            <input type="text" class="form-control" id="destination" placeholder="请输入目标地址">
+                        </div>
+                        <div class="mb-3">
+                            <button class="btn btn-primary w-100" id="searchDestinationBtn">
+                                <i class="fa fa-search"></i> 搜索地址
+                            </button>
+                        </div>
+                        <div id="destinationError" class="text-danger mb-3" style="display: none;"></div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">路线规划</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="routeType" class="form-label">路线类型</label>
+                            <select class="form-select" id="routeType">
+                                <option value="0">驾车</option>
+                                <option value="1">公交</option>
+                                <option value="2">步行</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <button class="btn btn-primary w-100" id="planRouteBtn">
+                                <i class="fa fa-map-signs"></i> 规划路线
+                            </button>
+                        </div>
+                        <div id="routeResult" class="mt-3" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧地图显示 -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div id="mapContainer" style="width: 100%; height: 600px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入通用JS -->
+    <script src="../common.js"></script>
+    <!-- 引入高德地图API -->
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode: 'f9f43bc64a6dc7969fa1d98b65c8877b'  // 替换为你的安全密钥
+        };
+    </script>
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=1eed9ba47dcdd38bac4059edec337e1e&plugin=AMap.ToolBar,AMap.Scale,AMap.MapType,AMap.Geolocation"></script>
+    <!-- 引入高德地图UI组件库 -->
+    <script type="text/javascript" src="https://webapi.amap.com/ui/1.1/main.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 从localStorage获取用户信息
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            
+            // 更新用户名称
+            if (userInfo) {
+                $('.user-name').text(userInfo.username);
+            }
+            
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 调用退出登录API
+                $.ajax({
+                    url: '/api/logout',
+                    type: 'POST',
+                    success: function(response) {
+                        // 退出成功，跳转到登录页面
+                        window.location.href = '../login.html';
+                    },
+                    error: function(xhr, status, error) {
+                        // 退出失败，直接跳转到登录页面
+                        window.location.href = '../login.html';
+                    }
+                });
+            });
+            
+            // 地图初始化
+            let map = null;
+            let currentLocation = null;
+            let destinationLocation = null;
+            let routePlanner = null;
+            let routeResultData = null;
+            
+            // 初始化地图
+            function initMap() {
+                map = new AMap.Map('mapContainer', {
+                    zoom: 13,
+                    center: [116.397428, 39.90923], // 默认北京坐标
+                    viewMode: '3D',
+                    pitch: 50
+                });
+                
+                // 添加控件
+                map.addControl(new AMap.ToolBar({
+                    position: 'RB'
+                }));
+                map.addControl(new AMap.Scale({
+                    position: 'RB'
+                }));
+                map.addControl(new AMap.MapType({
+                    defaultType: 0,
+                    showTraffic: false,
+                    showRoad: true
+                }));
+                
+                // 添加定位控件
+                map.addControl(new AMap.Geolocation({
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    buttonOffset: new AMap.Pixel(10, 20),
+                    zoomToAccuracy: true,
+                    buttonPosition: 'RB'
+                }));
+            }
+            
+            // 加载配送任务
+            function loadTasks() {
+                console.log('开始加载配送任务...');
+                $.ajax({
+                    url: '/api/delivery/tasks',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log('加载配送任务成功，响应数据类型:', typeof response);
+                        console.log('加载配送任务成功，响应数据:', JSON.stringify(response, null, 2));
+                        
+                        // 检查响应格式
+                        if (response && response.code === 0) {
+                            const tasks = response.data;
+                            console.log('任务列表数据类型:', typeof tasks);
+                            console.log('任务列表:', JSON.stringify(tasks, null, 2));
+                            
+                            const taskSelect = $('#taskSelect');
+                            taskSelect.empty();
+                            taskSelect.append('<option value="">请选择配送任务</option>');
+                            
+                            // 显示所有任务
+                            if (!Array.isArray(tasks)) {
+                                console.error('任务列表不是数组:', tasks);
+                                taskSelect.append('<option value="" disabled>加载任务失败：任务列表格式错误</option>');
+                                return;
+                            }
+                            
+                            if (tasks.length === 0) {
+                                console.log('暂无配送任务');
+                                taskSelect.append('<option value="" disabled>暂无配送任务</option>');
+                            } else {
+                                console.log('共有', tasks.length, '个配送任务');
+                                
+                                // 遍历任务列表，只添加配送中状态的任务
+                                let addedCount = 0;
+                                tasks.forEach((task, index) => {
+                                    console.log('处理第', index + 1, '个任务:', JSON.stringify(task, null, 2));
+                                    
+                                    // 检查任务对象是否包含必要的字段
+                                    console.log('任务字段检查:');
+                                    console.log('  task:', !!task);
+                                    console.log('  task.id:', !!task.id);
+                                    console.log('  task.taskId:', !!task.taskId);
+                                    console.log('  task.orderNumber:', !!task.orderNumber);
+                                    console.log('  task.receiverName:', !!task.receiverName);
+                                    console.log('  task.status:', !!task.status);
+                                    
+                                    // 只处理配送中状态的任务
+                                    if (task.status !== 'DELIVERING') {
+                                        console.log('跳过非配送中状态的任务:', task.status);
+                                        return;
+                                    }
+                                    
+                                    // 同时支持id和taskId字段
+                                    const taskId = task.taskId || task.id;
+                                    if (!task || !taskId || !task.orderNumber || !task.receiverName || !task.status) {
+                                        console.error('无效的任务对象，跳过:', task);
+                                        return;
+                                    }
+                                    
+                                    // 格式化状态文本
+                                    let statusText = '';
+                                    switch (task.status) {
+                                        case 'DELIVERING':
+                                            statusText = '配送中';
+                                            break;
+                                        default:
+                                            statusText = '未知状态';
+                                    }
+                                    
+                                    // 使用taskId或id作为选项值
+                                    const optionHtml = `<option value="${taskId}" data-address="${task.receiverAddress || ''}" data-status="${task.status}">${task.orderNumber} - ${task.receiverName} (${statusText})</option>`;
+                                    console.log('添加选项:', optionHtml);
+                                    taskSelect.append(optionHtml);
+                                    addedCount++;
+                                });
+                                
+                                console.log('成功添加了', addedCount, '个任务选项');
+                                
+                                // 绑定任务选择事件
+                                taskSelect.change(function() {
+                                    const selectedOption = $(this).find('option:selected');
+                                    const address = selectedOption.data('address');
+                                    if (address) {
+                                        $('#destination').val(address);
+                                    }
+                                });
+                            }
+                        } else {
+                            console.error('加载任务失败，响应码:', response.code, '响应消息:', response.message);
+                            const taskSelect = $('#taskSelect');
+                            taskSelect.empty();
+                            taskSelect.append('<option value="" disabled>加载任务失败：' + (response.message || '未知错误') + '</option>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载任务AJAX请求失败:', status, error);
+                        console.error('响应状态:', xhr.status);
+                        console.error('响应文本:', xhr.responseText);
+                        
+                        // 显示错误信息
+                        const taskSelect = $('#taskSelect');
+                        taskSelect.empty();
+                        taskSelect.append('<option value="" disabled>加载任务失败，请刷新页面重试</option>');
+                        
+                        // 显示原始错误信息，方便调试
+                        $('#locationError').text('加载任务失败: ' + error + '，状态码: ' + xhr.status).show();
+                    }
+                });
+            }
+            
+            // 获取当前位置
+            function getCurrentLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        const lng = position.coords.longitude;
+                        const lat = position.coords.latitude;
+                        currentLocation = [lng, lat];
+                        
+                        // 更新地图中心
+                        map.setCenter(currentLocation);
+                        
+                        // 添加标记
+                        const marker = new AMap.Marker({
+                            position: currentLocation,
+                            title: '当前位置',
+                            map: map
+                        });
+                        
+                        // 逆地理编码获取地址
+                        AMap.plugin('AMap.Geocoder', function() {
+                            const geocoder = new AMap.Geocoder({
+                                radius: 1000,
+                                extensions: "all"
+                            });
+                            
+                            geocoder.getAddress(currentLocation, function(status, result) {
+                                if (status === 'complete' && result.regeocode) {
+                                    $('#currentLocation').val(result.regeocode.formattedAddress);
+                                    $('#locationError').hide();
+                                }
+                            });
+                        });
+                    }, function(error) {
+                        let errorMsg = '';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMsg = '用户拒绝获取位置信息';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMsg = '位置信息不可用';
+                                break;
+                            case error.TIMEOUT:
+                                errorMsg = '获取位置信息超时';
+                                break;
+                            case error.UNKNOWN_ERROR:
+                                errorMsg = '获取位置信息失败';
+                                break;
+                        }
+                        $('#locationError').text(errorMsg).show();
+                    }, {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    });
+                } else {
+                    $('#locationError').text('您的浏览器不支持地理定位').show();
+                }
+            }
+            
+            // 手动输入位置搜索
+            function searchCurrentLocation() {
+                const address = $('#currentLocation').val();
+                if (address) {
+                    AMap.plugin('AMap.Geocoder', function() {
+                        const geocoder = new AMap.Geocoder({
+                            city: '',
+                            radius: 1000,
+                            extensions: "all"
+                        });
+                        
+                        geocoder.getLocation(address, function(status, result) {
+                            if (status === 'complete' && result.geocodes.length > 0) {
+                                const location = result.geocodes[0].location;
+                                currentLocation = [location.lng, location.lat];
+                                
+                                // 更新地图中心
+                                map.setCenter(currentLocation);
+                                
+                                // 添加标记
+                                const marker = new AMap.Marker({
+                                    position: currentLocation,
+                                    title: '当前位置',
+                                    map: map
+                                });
+                                
+                                $('#locationError').hide();
+                            } else {
+                                $('#locationError').text('地址搜索失败，请检查地址是否正确').show();
+                            }
+                        });
+                    });
+                } else {
+                    $('#locationError').text('请输入当前位置').show();
+                }
+            }
+            
+            // 搜索地址
+            function searchAddress(address) {
+                AMap.plugin('AMap.Geocoder', function() {
+                    const geocoder = new AMap.Geocoder({
+                        city: '',
+                        radius: 1000,
+                        extensions: "all"
+                    });
+                    
+                    geocoder.getLocation(address, function(status, result) {
+                        if (status === 'complete' && result.geocodes.length > 0) {
+                            const location = result.geocodes[0].location;
+                            destinationLocation = [location.lng, location.lat];
+                            
+                            // 添加标记
+                            const marker = new AMap.Marker({
+                                position: destinationLocation,
+                                title: '目标位置',
+                                map: map,
+                                icon: new AMap.Icon({
+                                    size: new AMap.Size(40, 40),
+                                    image: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png',
+                                    imageSize: new AMap.Size(40, 40)
+                                })
+                            });
+                            
+                            $('#destinationError').hide();
+                        } else {
+                            $('#destinationError').text('地址搜索失败，请检查地址是否正确').show();
+                        }
+                    });
+                });
+            }
+            
+            // 规划路线
+            function planRoute() {
+                if (!currentLocation) {
+                    $('#locationError').text('请先获取当前位置').show();
+                    return;
+                }
+                
+                if (!destinationLocation) {
+                    $('#destinationError').text('请先搜索目标地址').show();
+                    return;
+                }
+                
+                // 清除之前的路线
+                map.clearMap();
+                
+                // 重新添加标记
+                new AMap.Marker({
+                    position: currentLocation,
+                    title: '当前位置',
+                    map: map
+                });
+                
+                new AMap.Marker({
+                    position: destinationLocation,
+                    title: '目标位置',
+                    map: map,
+                    icon: new AMap.Icon({
+                        size: new AMap.Size(40, 40),
+                        image: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png',
+                        imageSize: new AMap.Size(40, 40)
+                    })
+                });
+                
+                // 获取路线类型
+                const routeType = $('#routeType').val();
+                let routeMode = 'car';
+                switch(routeType) {
+                    case '0':
+                        routeMode = 'car';
+                        break;
+                    case '1':
+                        routeMode = 'bus';
+                        break;
+                    case '2':
+                        routeMode = 'walk';
+                        break;
+                }
+                
+                // 规划路线
+                AMap.plugin(['AMap.Driving', 'AMap.Transfer', 'AMap.Walking'], function() {
+                    let planner;
+                    
+                    if (routeMode === 'car') {
+                        planner = new AMap.Driving({
+                            map: map,
+                            panel: 'routeResult',
+                            hideMarkers: false,
+                            showTraffic: true,
+                            policy: [AMap.DrivingPolicy.LEAST_TIME, AMap.DrivingPolicy.LEAST_DISTANCE, AMap.DrivingPolicy.AVOID_HIGHWAYS],
+                            showSteps: true,
+                            showRouteList: true,
+                            // 显示多种路线选择
+                            hideRouteList: false,
+                            // 显示时间和距离信息
+                            showTime: true,
+                            showDistance: true
+                        });
+                    } else if (routeMode === 'bus') {
+                        planner = new AMap.Transfer({
+                            map: map,
+                            panel: 'routeResult',
+                            city: '全国',
+                            policy: [AMap.TransferPolicy.LEAST_TIME, AMap.TransferPolicy.LEAST_TRANSFER, AMap.TransferPolicy.LEAST_WALK],
+                            showSteps: true,
+                            // 显示多种路线选择
+                            hideRouteList: false
+                        });
+                    } else {
+                        planner = new AMap.Walking({
+                            map: map,
+                            panel: 'routeResult',
+                            showSteps: true,
+                            // 显示多种路线选择
+                            hideRouteList: false,
+                            // 显示时间和距离信息
+                            showTime: true,
+                            showDistance: true
+                        });
+                    }
+                    
+                    // 计算路线
+                    if (routeMode === 'bus') {
+                        planner.search([{
+                            keyword: $('#currentLocation').val()
+                        }, {
+                            keyword: $('#destination').val()
+                        }], function(status, result) {
+                            if (status === 'complete') {
+                                // 保存路线结果数据
+                                routeResultData = result;
+                                $('#routeResult').show();
+                                // 添加自定义样式
+                                addRouteResultStyles();
+                                addUpdateTimeButton();
+                            } else {
+                                alert('路线规划失败，请检查地址是否正确');
+                            }
+                        });
+                    } else {
+                        planner.search(currentLocation, destinationLocation, function(status, result) {
+                            if (status === 'complete') {
+                                // 保存路线结果数据
+                                routeResultData = result;
+                                $('#routeResult').show();
+                                // 添加自定义样式
+                                addRouteResultStyles();
+                                addUpdateTimeButton();
+                            } else {
+                                alert('路线规划失败，请检查地址是否正确');
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // 添加路线结果自定义样式
+            function addRouteResultStyles() {
+                // 移除之前的样式
+                $('#routeResultStyle').remove();
+                
+                // 添加新样式
+                const style = `
+                    <style id="routeResultStyle">
+                        #routeResult {
+                            background-color: var(--card-background);
+                            border-radius: 8px;
+                            padding: 15px;
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                            max-height: 500px;
+                            overflow-y: auto;
+                        }
+                        
+                        /* 支持高德地图API 2.0的类名 */
+                        #routeResult .amap-driving,
+                        #routeResult .amap-transfer,
+                        #routeResult .amap-walking {
+                            font-family: inherit;
+                        }
+                        
+                        /* 路线结果容器 */
+                        #routeResult .amap-driving-result,
+                        #routeResult .amap-transfer-result,
+                        #routeResult .amap-walking-result {
+                            margin-bottom: 20px;
+                        }
+                        
+                        /* 路线结果项 */
+                        #routeResult .amap-driving-result-item,
+                        #routeResult .amap-transfer-result-item,
+                        #routeResult .amap-walking-result-item {
+                            background-color: var(--light-color);
+                            border: 1px solid var(--border-color);
+                            border-radius: 8px;
+                            padding: 15px;
+                            margin-bottom: 10px;
+                            transition: all 0.3s ease;
+                            cursor: pointer;
+                        }
+                        
+                        #routeResult .amap-driving-result-item:hover,
+                        #routeResult .amap-transfer-result-item:hover,
+                        #routeResult .amap-walking-result-item:hover {
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+                            transform: translateY(-2px);
+                        }
+                        
+                        /* 路线标题 */
+                        #routeResult .amap-driving-result-item-title,
+                        #routeResult .amap-transfer-result-item-title,
+                        #routeResult .amap-walking-result-item-title {
+                            font-size: 16px;
+                            font-weight: 600;
+                            margin-bottom: 10px;
+                            color: var(--primary-color);
+                        }
+                        
+                        /* 路线信息 */
+                        #routeResult .amap-driving-result-item-info,
+                        #routeResult .amap-transfer-result-item-info,
+                        #routeResult .amap-walking-result-item-info {
+                            display: flex;
+                            gap: 20px;
+                            margin-bottom: 10px;
+                            font-size: 14px;
+                            color: var(--secondary-color);
+                        }
+                        
+                        /* 时间和距离信息 */
+                        #routeResult .amap-driving-result-item-time,
+                        #routeResult .amap-driving-result-item-distance,
+                        #routeResult .amap-transfer-result-item-time,
+                        #routeResult .amap-transfer-result-item-distance,
+                        #routeResult .amap-walking-result-item-time,
+                        #routeResult .amap-walking-result-item-distance {
+                            display: flex;
+                            align-items: center;
+                            gap: 5px;
+                        }
+                        
+                        /* 时间图标 */
+                        #routeResult .amap-driving-result-item-time::before,
+                        #routeResult .amap-transfer-result-item-time::before,
+                        #routeResult .amap-walking-result-item-time::before {
+                            content: "\f017";
+                            font-family: "Font Awesome 5 Free";
+                            font-weight: 900;
+                        }
+                        
+                        /* 距离图标 */
+                        #routeResult .amap-driving-result-item-distance::before,
+                        #routeResult .amap-transfer-result-item-distance::before,
+                        #routeResult .amap-walking-result-item-distance::before {
+                            content: "\f041";
+                            font-family: "Font Awesome 5 Free";
+                            font-weight: 900;
+                        }
+                        
+                        /* 路线描述 */
+                        #routeResult .amap-driving-result-item-route,
+                        #routeResult .amap-transfer-result-item-route,
+                        #routeResult .amap-walking-result-item-route {
+                            font-size: 13px;
+                            color: var(--text-color);
+                            line-height: 1.5;
+                        }
+                        
+                        /* 路线步骤 */
+                        #routeResult .amap-driving-steps,
+                        #routeResult .amap-transfer-steps,
+                        #routeResult .amap-walking-steps {
+                            background-color: var(--card-background);
+                            border: 1px solid var(--border-color);
+                            border-radius: 8px;
+                            padding: 15px;
+                            margin-top: 10px;
+                        }
+                        
+                        /* 单个步骤 */
+                        #routeResult .amap-driving-step,
+                        #routeResult .amap-transfer-step,
+                        #routeResult .amap-walking-step {
+                            margin-bottom: 10px;
+                            padding-bottom: 10px;
+                            border-bottom: 1px solid var(--border-color);
+                        }
+                        
+                        #routeResult .amap-driving-step:last-child,
+                        #routeResult .amap-transfer-step:last-child,
+                        #routeResult .amap-walking-step:last-child {
+                            margin-bottom: 0;
+                            padding-bottom: 0;
+                            border-bottom: none;
+                        }
+                        
+                        /* 步骤图标 */
+                        #routeResult .amap-driving-step-icon,
+                        #routeResult .amap-transfer-step-icon,
+                        #routeResult .amap-walking-step-icon {
+                            margin-right: 10px;
+                            color: var(--primary-color);
+                        }
+                        
+                        /* 兼容旧版API */
+                        #routeResult .amap-lib-driving {
+                            font-family: inherit;
+                        }
+                        
+                        #routeResult .amap-lib-driving-result {
+                            margin-bottom: 20px;
+                        }
+                        
+                        #routeResult .amap-lib-driving-result-item {
+                            background-color: var(--light-color);
+                            border: 1px solid var(--border-color);
+                            border-radius: 8px;
+                            padding: 15px;
+                            margin-bottom: 10px;
+                            transition: all 0.3s ease;
+                            cursor: pointer;
+                        }
+                        
+                        #routeResult .amap-lib-driving-result-item:hover {
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+                            transform: translateY(-2px);
+                        }
+                        
+                        #routeResult .amap-lib-driving-result-item-title {
+                            font-size: 16px;
+                            font-weight: 600;
+                            margin-bottom: 10px;
+                            color: var(--primary-color);
+                        }
+                        
+                        #routeResult .amap-lib-driving-result-item-info {
+                            display: flex;
+                            gap: 20px;
+                            margin-bottom: 10px;
+                            font-size: 14px;
+                            color: var(--secondary-color);
+                        }
+                        
+                        #routeResult .amap-lib-driving-result-item-time,
+                        #routeResult .amap-lib-driving-result-item-distance {
+                            display: flex;
+                            align-items: center;
+                            gap: 5px;
+                        }
+                        
+                        #routeResult .amap-lib-driving-result-item-time::before {
+                            content: "\f017";
+                            font-family: "Font Awesome 5 Free";
+                            font-weight: 900;
+                        }
+                        
+                        #routeResult .amap-lib-driving-result-item-distance::before {
+                            content: "\f041";
+                            font-family: "Font Awesome 5 Free";
+                            font-weight: 900;
+                        }
+                        
+                        #routeResult .amap-lib-driving-result-item-route {
+                            font-size: 13px;
+                            color: var(--text-color);
+                            line-height: 1.5;
+                        }
+                        
+                        #routeResult .amap-lib-driving-steps {
+                            background-color: var(--card-background);
+                            border: 1px solid var(--border-color);
+                            border-radius: 8px;
+                            padding: 15px;
+                            margin-top: 10px;
+                        }
+                        
+                        #routeResult .amap-lib-driving-step {
+                            margin-bottom: 10px;
+                            padding-bottom: 10px;
+                            border-bottom: 1px solid var(--border-color);
+                        }
+                        
+                        #routeResult .amap-lib-driving-step:last-child {
+                            margin-bottom: 0;
+                            padding-bottom: 0;
+                            border-bottom: none;
+                        }
+                        
+                        #routeResult .amap-lib-driving-step-icon {
+                            margin-right: 10px;
+                            color: var(--primary-color);
+                        }
+                    </style>
+                `;
+                
+                $('head').append(style);
+            }
+            
+            // 添加更新预计送达时间按钮
+            function addUpdateTimeButton() {
+                const routeResult = $('#routeResult');
+                const updateTimeBtn = $('<button class="btn btn-success mt-3"><i class="fa fa-clock-o"></i> 一键更新预计送达时间</button>');
+                
+                // 移除之前的按钮
+                routeResult.find('.update-time-btn').remove();
+                
+                // 添加新按钮
+                updateTimeBtn.addClass('update-time-btn');
+                updateTimeBtn.click(function() {
+                    updateExpectedDeliveryTime();
+                });
+                routeResult.append(updateTimeBtn);
+            }
+            
+            // 更新预计送达时间
+            function updateExpectedDeliveryTime() {
+                const taskId = $('#taskSelect').val();
+                if (!taskId) {
+                    alert('请先选择配送任务');
+                    return;
+                }
+                
+                let minutes = 30; // 默认30分钟
+                
+                // 从保存的路线结果数据中获取时间
+                if (routeResultData) {
+                    console.log('路线结果数据:', routeResultData);
+                    
+                    let routeTimeSeconds = 0;
+                    
+                    // 根据高德地图API返回结果的不同结构，尝试多种方式获取时间
+                    if (routeResultData.routes && routeResultData.routes.length > 0) {
+                        // 驾车、步行等路线规划结果
+                        const firstRoute = routeResultData.routes[0];
+                        if (firstRoute.time) {
+                            // 时间单位为秒
+                            routeTimeSeconds = firstRoute.time;
+                        }
+                    } else if (routeResultData.plans && routeResultData.plans.length > 0) {
+                        // 公交路线规划结果
+                        const firstPlan = routeResultData.plans[0];
+                        if (firstPlan.time) {
+                            // 时间单位为秒
+                            routeTimeSeconds = firstPlan.time;
+                        }
+                    } else if (routeResultData.data && routeResultData.data.routes && routeResultData.data.routes.length > 0) {
+                        // 其他可能的结构
+                        const firstRoute = routeResultData.data.routes[0];
+                        if (firstRoute.time) {
+                            routeTimeSeconds = firstRoute.time;
+                        }
+                    }
+                    
+                    if (routeTimeSeconds > 0) {
+                        // 将秒转换为分钟
+                        minutes = Math.ceil(routeTimeSeconds / 60);
+                        console.log('从路线结果数据中获取到的时间:', routeTimeSeconds, '秒，转换为', minutes, '分钟');
+                    }
+                }
+                
+                console.log('最终使用的分钟数:', minutes);
+                
+                // 计算预计送达时间：当前时间 + 路线时间 + 12小时
+                const now = new Date();
+                // 12小时 = 12 * 60 * 60 * 1000毫秒
+                const expectedTime = new Date(now.getTime() + minutes * 60 * 1000 + 12 * 60 * 60 * 1000);
+                
+                // 格式化时间为yyyy-MM-dd HH:mm:ss格式，符合后端API要求
+                const year = expectedTime.getFullYear();
+                const month = String(expectedTime.getMonth() + 1).padStart(2, '0');
+                const day = String(expectedTime.getDate()).padStart(2, '0');
+                const hours = String(expectedTime.getHours()).padStart(2, '0');
+                const minutesStr = String(expectedTime.getMinutes()).padStart(2, '0');
+                const seconds = String(expectedTime.getSeconds()).padStart(2, '0');
+                const expectedTimeStr = `${year}-${month}-${day} ${hours}:${minutesStr}:${seconds}`;
+                
+                console.log('预计送达时间:', expectedTimeStr);
+                
+                // 调用API更新预计送达时间
+                $.ajax({
+                    url: `/api/delivery/task/${taskId}/expected-time`,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ expectedDeliveryTime: expectedTimeStr }),
+                    success: function(response) {
+                        if (response.code === 0) {
+                            alert('预计送达时间更新成功');
+                        } else {
+                            alert('预计送达时间更新失败：' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('预计送达时间更新失败：' + error);
+                    }
+                });
+            }
+            
+            // 事件绑定
+            $('#getLocationBtn').click(getCurrentLocation);
+            $('#refreshLocationBtn').click(getCurrentLocation);
+            $('#searchCurrentLocationBtn').click(searchCurrentLocation);
+            
+            $('#searchDestinationBtn').click(function() {
+                const destination = $('#destination').val();
+                if (destination) {
+                    searchAddress(destination);
+                } else {
+                    $('#destinationError').text('请输入目标地址').show();
+                }
+            });
+            
+            $('#planRouteBtn').click(planRoute);
+            
+            // 初始化
+            initMap();
+            loadTasks();
+        });
+    </script>
+</body>
+</html>

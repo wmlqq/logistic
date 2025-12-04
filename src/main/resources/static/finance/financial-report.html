@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>财务报表 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        /* 筛选区域 */
+        .filter-section {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 表格样式 */
+        .table {
+            color: var(--text-color);
+        }
+
+        .table th {
+            background-color: var(--light-color);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table td {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">财务人员中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="financial-report.html" class="active"><i class="fa fa-file-text-o"></i> 物流费用报表</a></li>
+            <li><a href="order-report.html"><i class="fa fa-shopping-cart"></i> 订单量报表</a></li>
+            <li><a href="profile.html"><i class="fa fa-user"></i> 个人资料</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">物流费用报表</h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 筛选区域 -->
+        <div class="filter-section shadow-sm">
+            <h5 class="text-primary fw-bold mb-4">报表筛选</h5>
+            <form id="reportFilterForm">
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="reportType" class="form-label fw-medium">报表类型</label>
+                            <select class="form-select form-select-sm" id="reportType">
+                                <option value="monthly">月度报表</option>
+                                <option value="quarterly">季度报表</option>
+                                <option value="yearly">年度报表</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="year" class="form-label fw-medium">年份</label>
+                            <select class="form-select form-select-sm" id="year">
+                                <!-- 年份选项将通过JavaScript动态生成 -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="month" class="form-label fw-medium">月份</label>
+                            <select class="form-select form-select-sm" id="month">
+                                <option value="1">1月</option>
+                                <option value="2">2月</option>
+                                <option value="3">3月</option>
+                                <option value="4">4月</option>
+                                <option value="5">5月</option>
+                                <option value="6">6月</option>
+                                <option value="7">7月</option>
+                                <option value="8">8月</option>
+                                <option value="9">9月</option>
+                                <option value="10">10月</option>
+                                <option value="11">11月</option>
+                                <option value="12">12月</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="quarter" class="form-label fw-medium">季度</label>
+                            <select class="form-select form-select-sm" id="quarter">
+                                <option value="1">第一季度</option>
+                                <option value="2">第二季度</option>
+                                <option value="3">第三季度</option>
+                                <option value="4">第四季度</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-12 d-flex justify-content-start">
+                        <button type="submit" class="btn btn-primary btn-sm me-2 shadow-sm">
+                            <i class="fa fa-search"></i> 生成报表
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm shadow-sm" id="exportBtn">
+                            <i class="fa fa-download"></i> 导出报表
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 报表内容 -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">财务报表详情</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-6 g-4">
+                    <div class="col-md-3">
+                        <div class="card text-center shadow-lg">
+                            <div class="card-body p-4">
+                                <h6 class="card-subtitle mb-3 text-muted">总收入</h6>
+                                <h3 class="card-title text-primary" id="totalRevenue">¥0.00</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center shadow-lg">
+                            <div class="card-body p-4">
+                                <h6 class="card-subtitle mb-3 text-muted">订单数量</h6>
+                                <h3 class="card-title text-success" id="orderCount">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center shadow-lg">
+                            <div class="card-body p-4">
+                                <h6 class="card-subtitle mb-3 text-muted">平均订单金额</h6>
+                                <h3 class="card-title text-info" id="avgOrderAmount">¥0.00</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center shadow-lg">
+                            <div class="card-body p-4">
+                                <h6 class="card-subtitle mb-3 text-muted">报表类型</h6>
+                                <h3 class="card-title text-warning" id="reportTypeText">月度报表</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 收入明细 -->
+                <div class="mb-4">
+                    <h6 class="text-primary fw-bold mb-3">订单收入明细</h6>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>订单号</th>
+                                    <th>客户名称</th>
+                                    <th>配送方式</th>
+                                    <th>订单金额</th>
+                                    <th>订单状态</th>
+                                    <th>创建时间</th>
+                                </tr>
+                            </thead>
+                            <tbody id="incomeDetail">
+                                <!-- 订单明细数据将通过AJAX加载 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 动态生成年份选项
+            function generateYearOptions() {
+                const yearSelect = $('#year');
+                const currentYear = new Date().getFullYear();
+                
+                // 清空现有选项
+                yearSelect.empty();
+                
+                // 生成当前年份和过去4年的年份选项
+                for (let i = currentYear; i >= currentYear - 4; i--) {
+                    const option = $('<option></option>').val(i).text(i);
+                    yearSelect.append(option);
+                }
+            }
+            
+            // 调用函数生成年份选项
+            generateYearOptions();
+            
+            // 从localStorage获取用户信息
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            
+            // 更新用户名称
+            if (userInfo) {
+                $('.user-name').text(userInfo.username);
+            }
+            
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 调用退出登录API
+                $.ajax({
+                    url: '/api/logout',
+                    type: 'POST',
+                    success: function(response) {
+                        // 退出成功，跳转到登录页面
+                        window.location.href = '../login.html';
+                    },
+                    error: function(xhr, status, error) {
+                        // 退出失败，直接跳转到登录页面
+                        window.location.href = '../login.html';
+                    }
+                });
+            });
+            
+            // 生成报表
+            function generateReport() {
+                // 获取筛选条件
+                const reportType = $('#reportType').val();
+                const year = $('#year').val();
+                const month = $('#month').val();
+                const quarter = $('#quarter').val();
+                
+                // 显示加载状态
+                $('#incomeDetail').html('<tr><td colspan="6" class="text-center"><i class="fa fa-spinner fa-spin"></i> 正在生成报表...</td></tr>');
+                
+                $.ajax({
+                    url: '/api/finance/report',
+                    type: 'GET',
+                    data: {
+                        type: reportType,
+                        year: year,
+                        month: month,
+                        quarter: quarter
+                    },
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const report = response.data;
+                            
+                            // 报表类型映射
+                            const reportTypeMap = {
+                                'monthly': '月度报表',
+                                'quarterly': '季度报表',
+                                'yearly': '年度报表'
+                            };
+                            
+                            // 填充财务数据
+                            $('#totalRevenue').text('¥' + report.totalRevenue.toFixed(2));
+                            
+                            // 计算订单数量
+                            const orderCount = report.details.length;
+                            $('#orderCount').text(orderCount);
+                            
+                            // 计算平均订单金额
+                            const avgOrderAmount = orderCount > 0 ? report.totalRevenue / orderCount : 0;
+                            $('#avgOrderAmount').text('¥' + avgOrderAmount.toFixed(2));
+                            
+                            // 填充报表类型文本
+                            const reportTypeText = reportTypeMap[reportType] || '自定义报表';
+                            $('#reportTypeText').text(reportTypeText);
+                            
+                            // 订单状态映射
+                            const statusMap = {
+                                'PENDING': '待处理',
+                                'APPROVED': '已审核',
+                                'ASSIGNED': '已分配',
+                                'DELIVERING': '配送中',
+                                'COMPLETED': '已完成',
+                                'CANCELLED': '已取消'
+                            };
+                            
+                            // 填充订单收入明细
+                            const incomeTbody = $('#incomeDetail');
+                            incomeTbody.empty();
+                            
+                            if (report.details.length === 0) {
+                                incomeTbody.html('<tr><td colspan="6" class="text-center text-muted">暂无数据</td></tr>');
+                            } else {
+                                report.details.forEach(order => {
+                                    // 格式化日期
+                                    const createTime = new Date(order.createTime).toLocaleString();
+                                    
+                                    // 获取中文状态
+                                    const statusText = statusMap[order.status] || order.status;
+                                    
+                                    const row = `
+                                        <tr>
+                                            <td>${order.orderNumber}</td>
+                                            <td>${order.customerName}</td>
+                                            <td>${order.deliveryMethod}</td>
+                                            <td>¥${order.totalAmount.toFixed(2)}</td>
+                                            <td>${statusText}</td>
+                                            <td>${createTime}</td>
+                                        </tr>
+                                    `;
+                                    incomeTbody.append(row);
+                                });
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('生成报表失败:', error);
+                        $('#incomeDetail').html('<tr><td colspan="6" class="text-center text-danger">生成报表失败，请重试</td></tr>');
+                    }
+                });
+            }
+            
+            // 导出报表功能
+            $('#exportBtn').click(function() {
+                // 获取报表数据
+                const reportType = $('#reportType').val();
+                const year = $('#year').val();
+                const month = $('#month').val();
+                const quarter = $('#quarter').val();
+                
+                // 显示加载状态
+                const originalText = $(this).html();
+                $(this).html('<i class="fa fa-spinner fa-spin"></i> 正在导出...');
+                $(this).prop('disabled', true);
+                
+                $.ajax({
+                    url: '/api/finance/report',
+                    type: 'GET',
+                    data: {
+                        type: reportType,
+                        year: year,
+                        month: month,
+                        quarter: quarter
+                    },
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const report = response.data;
+                            
+                            // 订单状态映射
+                            const statusMap = {
+                                'PENDING': '待处理',
+                                'APPROVED': '已审核',
+                                'ASSIGNED': '已分配',
+                                'DELIVERING': '配送中',
+                                'COMPLETED': '已完成',
+                                'CANCELLED': '已取消'
+                            };
+                            
+                            // 准备CSV数据
+                            let csvContent = "订单号,客户名称,配送方式,订单金额,订单状态,创建时间\n";
+                            
+                            report.details.forEach(order => {
+                                // 格式化日期
+                                const createTime = new Date(order.createTime).toLocaleString();
+                                
+                                // 获取中文状态
+                                const statusText = statusMap[order.status] || order.status;
+                                
+                                // 构建CSV行，处理包含逗号的数据
+                                const row = `"${order.orderNumber}","${order.customerName}","${order.deliveryMethod}","${order.totalAmount.toFixed(2)}","${statusText}","${createTime}"\n`;
+                                csvContent += row;
+                            });
+                            
+                            // 创建下载链接
+                            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                            const link = document.createElement("a");
+                            
+                            if (link.download !== undefined) {
+                                const url = URL.createObjectURL(blob);
+                                link.setAttribute("href", url);
+                                link.setAttribute("download", `财务报表_${year}_${reportType}.csv`);
+                                link.style.visibility = 'hidden';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('导出报表失败:', error);
+                        alert('导出报表失败，请重试');
+                    },
+                    complete: function() {
+                        // 恢复按钮状态
+                        $('#exportBtn').html(originalText);
+                        $('#exportBtn').prop('disabled', false);
+                    }
+                });
+            });
+            
+            // 表单提交
+            $('#reportFilterForm').submit(function(e) {
+                e.preventDefault();
+                generateReport();
+            });
+            
+            // 初始化生成报表
+            generateReport();
+        });
+    </script>
+</body>
+</html>

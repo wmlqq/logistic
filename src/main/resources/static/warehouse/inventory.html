@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>库存管理 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        /* 搜索栏样式 */
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-bar .form-control {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        /* 表格样式 */
+        .table {
+            color: var(--text-color);
+        }
+
+        .table th {
+            background-color: var(--light-color);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table td {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* 分页样式 */
+        .pagination {
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination .page-item .page-link {
+            background-color: var(--card-background);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* 模态框样式 */
+        .modal-content {
+            background-color: var(--card-background);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">仓库管理员中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="inventory.html" class="active"><i class="fa fa-cubes"></i> 库存管理</a></li>
+            <li><a href="inventory-alert.html"><i class="fa fa-exclamation-triangle"></i> 库存预警</a></li>
+            <li><a href="stock-import-export.html"><i class="fa fa-file-excel-o"></i> 库存导入导出</a></li>
+            <li><a href="warehouse-location.html"><i class="fa fa-map-marker"></i> 仓库位置管理</a></li>
+            <li><a href="profile.html"><i class="fa fa-user"></i> 个人资料</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">库存管理</h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 搜索栏 -->
+        <div class="search-bar">
+            <input type="text" class="form-control" id="searchInput" placeholder="搜索商品名称或编码">
+            <select class="form-select" id="statusSelect">
+                <option value="">全部状态</option>
+                <option value="AVAILABLE">可用</option>
+                <option value="UNAVAILABLE">不可用</option>
+            </select>
+            <button class="btn btn-primary" id="searchBtn">
+                <i class="fa fa-search"></i> 搜索
+            </button>
+            <button class="btn btn-success" id="addProductBtn">
+                <i class="fa fa-plus"></i> 新增商品
+            </button>
+        </div>
+
+        <!-- 库存列表 -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>商品编码</th>
+                                <th>商品名称</th>
+                                <th>规格</th>
+                                <th>单位</th>
+                                <th>价格</th>
+                                <th>库存</th>
+                                <th>预警阈值</th>
+                                <th>仓库位置</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTable">
+                            <!-- 库存数据将通过AJAX加载 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 分页 -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination" id="pagination">
+                        <!-- 分页按钮将通过JS动态生成 -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- 调整库存模态框 -->
+    <div class="modal fade" id="adjustStockModal" tabindex="-1" aria-labelledby="adjustStockModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="adjustStockModalLabel">调整库存</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="adjustStockForm">
+                        <input type="hidden" id="productId">
+                        <div class="mb-3">
+                            <label for="productName" class="form-label">商品名称</label>
+                            <input type="text" class="form-control" id="productName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="currentStock" class="form-label">当前库存</label>
+                            <input type="number" class="form-control" id="currentStock" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adjustType" class="form-label">调整类型</label>
+                            <select class="form-select" id="adjustType" required>
+                                <option value="IN">入库</option>
+                                <option value="OUT">出库</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adjustQuantity" class="form-label">调整数量</label>
+                            <input type="number" class="form-control" id="adjustQuantity" required min="1">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="confirmAdjustBtn">确认调整</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增商品模态框 -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProductModalLabel">新增商品</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addProductForm">
+                        <div class="mb-3">
+                            <label for="newProductName" class="form-label">商品名称</label>
+                            <input type="text" class="form-control" id="newProductName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newProductCode" class="form-label">商品编码</label>
+                            <input type="text" class="form-control" id="newProductCode" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newSpecification" class="form-label">规格</label>
+                            <input type="text" class="form-control" id="newSpecification" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newUnit" class="form-label">单位</label>
+                            <input type="text" class="form-control" id="newUnit" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPrice" class="form-label">价格</label>
+                            <input type="number" class="form-control" id="newPrice" required step="0.01" min="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="newStock" class="form-label">库存</label>
+                            <input type="number" class="form-control" id="newStock" required min="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="newAlertThreshold" class="form-label">预警阈值</label>
+                            <input type="number" class="form-control" id="newAlertThreshold" required min="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="newLocationId" class="form-label">仓库位置</label>
+                            <select class="form-select" id="newLocationId">
+                                <option value="">请选择仓库位置</option>
+                                <!-- 仓库位置将通过AJAX加载 -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newStatus" class="form-label">状态</label>
+                            <select class="form-select" id="newStatus" required>
+                                <option value="1">可用</option>
+                                <option value="0">不可用</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newRemark" class="form-label">备注</label>
+                            <textarea class="form-control" id="newRemark" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="confirmAddProductBtn">确认添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 编辑商品状态模态框 -->
+    <div class="modal fade" id="editStatusModal" tabindex="-1" aria-labelledby="editStatusModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editStatusModalLabel">编辑商品状态</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editStatusForm">
+                        <input type="hidden" id="editProductId">
+                        <div class="mb-3">
+                            <label for="editProductName" class="form-label">商品名称</label>
+                            <input type="text" class="form-control" id="editProductName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editProductStatus" class="form-label">状态</label>
+                            <select class="form-select" id="editProductStatus" required>
+                                <option value="1">可用</option>
+                                <option value="0">不可用</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="confirmEditStatusBtn">确认修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入通用JS -->
+    <script src="../common.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 调用退出登录API
+                $.ajax({
+                    url: '/api/logout',
+                    type: 'POST',
+                    success: function(response) {
+                        // 退出成功，跳转到登录页面
+                        window.location.href = '../login.html';
+                    },
+                    error: function(xhr, status, error) {
+                        // 退出失败，直接跳转到登录页面
+                        window.location.href = '../login.html';
+                    }
+                });
+            });
+
+            // 全局变量
+            let currentPage = 1;
+            const pageSize = 10;
+            
+            // 加载库存数据
+            function loadInventory(page = 1) {
+                const searchKeyword = $('#searchInput').val();
+                const status = $('#statusSelect').val();
+                
+                $.ajax({
+                    url: '/api/warehouse/inventory',
+                    type: 'GET',
+                    data: {
+                        page: page,
+                        size: pageSize,
+                        keyword: searchKeyword
+                    },
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const data = response.data;
+                            const inventory = data.records;
+                            const tbody = $('#inventoryTable');
+                            tbody.empty();
+                            
+                            inventory.forEach(item => {
+                                const statusText = item.status === 1 ? '可用' : '不可用';
+                                const statusClass = item.status === 1 ? 'success' : 'danger';
+                                
+                                const row = `
+                                    <tr>
+                                        <td>${item.productCode}</td>
+                                        <td>${item.productName}</td>
+                                        <td>${item.specification}</td>
+                                        <td>${item.unit}</td>
+                                        <td>${item.price}</td>
+                                        <td>${item.stock}</td>
+                                        <td>${item.alertThreshold}</td>
+                                        <td>${item.warehouseLocation}</td>
+                                        <td><span class="badge bg-${statusClass}">${statusText}</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary adjust-stock-btn" 
+                                                    data-id="${item.productId}" 
+                                                    data-name="${item.productName}" 
+                                                    data-stock="${item.stock}">
+                                                <i class="fa fa-edit"></i> 调整库存
+                                            </button>
+                                            <button class="btn btn-sm btn-warning edit-status-btn" 
+                                                    data-id="${item.productId}" 
+                                                    data-name="${item.productName}" 
+                                                    data-status="${item.status}">
+                                                <i class="fa fa-toggle-on"></i> 编辑状态
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                                tbody.append(row);
+                            });
+                            
+                            // 绑定调整库存按钮事件
+                            $('.adjust-stock-btn').click(function() {
+                                const productId = $(this).data('id');
+                                const productName = $(this).data('name');
+                                const currentStock = $(this).data('stock');
+                                
+                                // 填充模态框数据
+                                $('#productId').val(productId);
+                                $('#productName').val(productName);
+                                $('#currentStock').val(currentStock);
+                                
+                                // 显示模态框
+                                const modal = new bootstrap.Modal($('#adjustStockModal'));
+                                modal.show();
+                            });
+                            
+                            // 更新当前页码
+                            currentPage = page;
+                            
+                            // 生成分页
+                            generatePagination(data.total, data.pages, page);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载库存数据失败:', error);
+                    }
+                });
+            }
+            
+            // 生成分页
+            function generatePagination(total, pages, currentPage) {
+                const pagination = $('#pagination');
+                pagination.empty();
+                
+                // 上一页
+                const prevLi = $('<li class="page-item"></li>');
+                const prevLink = $('<a class="page-link" href="#"></a>').text('上一页');
+                if (currentPage === 1) {
+                    prevLi.addClass('disabled');
+                } else {
+                    prevLink.click(function() {
+                        loadInventory(currentPage - 1);
+                    });
+                }
+                prevLi.append(prevLink);
+                pagination.append(prevLi);
+                
+                // 页码
+                for (let i = 1; i <= pages; i++) {
+                    const li = $('<li class="page-item"></li>');
+                    const link = $('<a class="page-link" href="#"></a>').text(i);
+                    if (i === currentPage) {
+                        li.addClass('active');
+                    } else {
+                        link.click(function() {
+                            loadInventory(i);
+                        });
+                    }
+                    li.append(link);
+                    pagination.append(li);
+                }
+                
+                // 下一页
+                const nextLi = $('<li class="page-item"></li>');
+                const nextLink = $('<a class="page-link" href="#"></a>').text('下一页');
+                if (currentPage === pages) {
+                    nextLi.addClass('disabled');
+                } else {
+                    nextLink.click(function() {
+                        loadInventory(currentPage + 1);
+                    });
+                }
+                nextLi.append(nextLink);
+                pagination.append(nextLi);
+            }
+            
+            // 确认调整库存
+            $('#confirmAdjustBtn').click(function() {
+                const productId = $('#productId').val();
+                const adjustType = $('#adjustType').val();
+                const adjustQuantity = parseInt($('#adjustQuantity').val());
+                
+                $.ajax({
+                    url: `/api/warehouse/inventory/${productId}/adjust`,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        quantity: adjustQuantity,
+                        type: adjustType
+                    }),
+                    success: function(response) {
+                        if (response.code === 0) {
+                            // 调整成功，关闭模态框并刷新数据
+                            const modal = bootstrap.Modal.getInstance($('#adjustStockModal'));
+                            modal.hide();
+                            loadInventory(currentPage);
+                            
+                            // 显示成功提示
+                            alert('库存调整成功！');
+                        } else {
+                            // 显示失败提示
+                            alert('库存调整失败：' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('调整库存失败:', error);
+                        alert('库存调整失败，请重试！');
+                    }
+                });
+            });
+            
+            // 搜索按钮事件
+            $('#searchBtn').click(function() {
+                loadInventory(1);
+            });
+            
+            // 回车键搜索
+            $('#searchInput').keypress(function(e) {
+                if (e.which === 13) {
+                    loadInventory(1);
+                }
+            });
+            
+            // 状态筛选变化
+            $('#statusSelect').change(function() {
+                loadInventory(1);
+            });
+            
+            // 加载仓库位置数据
+            function loadWarehouseLocations() {
+                $.ajax({
+                    url: '/api/warehouse/locations',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const locations = response.data;
+                            const locationSelect = $('#newLocationId');
+                            
+                            // 清空现有选项（保留默认选项）
+                            locationSelect.find('option:not(:first)').remove();
+                            
+                            // 添加仓库位置选项
+                            locations.forEach(location => {
+                                const option = $('<option></option>')
+                                    .val(location.locationId)
+                                    .text(location.locationCode + ' - ' + location.description);
+                                locationSelect.append(option);
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载仓库位置失败:', error);
+                    }
+                });
+            }
+            
+            // 新增商品按钮事件
+            $('#addProductBtn').click(function() {
+                // 重置表单
+                $('#addProductForm')[0].reset();
+                
+                // 加载仓库位置数据
+                loadWarehouseLocations();
+                
+                // 显示新增商品模态框
+                const modal = new bootstrap.Modal($('#addProductModal'));
+                modal.show();
+            });
+            
+            // 确认添加商品
+            $('#confirmAddProductBtn').click(function() {
+                // 获取表单数据
+                const productData = {
+                    productName: $('#newProductName').val(),
+                    productCode: $('#newProductCode').val(),
+                    specification: $('#newSpecification').val(),
+                    unit: $('#newUnit').val(),
+                    price: parseFloat($('#newPrice').val()),
+                    stock: parseInt($('#newStock').val()),
+                    alertThreshold: parseInt($('#newAlertThreshold').val()),
+                    status: parseInt($('#newStatus').val()),
+                    remark: $('#newRemark').val()
+                };
+                
+                // 添加仓库位置关联（如果选择了位置）
+                const locationId = $('#newLocationId').val();
+                if (locationId) {
+                    productData.location = {
+                        id: parseInt(locationId)
+                    };
+                }
+                
+                $.ajax({
+                    url: '/api/warehouse/inventory',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(productData),
+                    success: function(response) {
+                        if (response.code === 0) {
+                            // 添加成功，关闭模态框并刷新数据
+                            const modal = bootstrap.Modal.getInstance($('#addProductModal'));
+                            modal.hide();
+                            loadInventory(1);
+                            
+                            // 显示成功提示
+                            alert('商品添加成功！');
+                        } else {
+                            // 显示失败提示
+                            alert('商品添加失败：' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('添加商品失败:', error);
+                        alert('添加商品失败，请重试！');
+                    }
+                });
+            });
+            
+            // 绑定编辑状态按钮事件
+            $(document).on('click', '.edit-status-btn', function() {
+                const productId = $(this).data('id');
+                const productName = $(this).data('name');
+                const productStatus = $(this).data('status');
+                
+                // 填充模态框数据
+                $('#editProductId').val(productId);
+                $('#editProductName').val(productName);
+                $('#editProductStatus').val(productStatus);
+                
+                // 显示模态框
+                const modal = new bootstrap.Modal($('#editStatusModal'));
+                modal.show();
+            });
+            
+            // 确认修改商品状态
+            $('#confirmEditStatusBtn').click(function() {
+                // 获取表单数据
+                const productId = $('#editProductId').val();
+                const productStatus = parseInt($('#editProductStatus').val());
+                
+                $.ajax({
+                    url: `/api/warehouse/inventory/${productId}/status`,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        status: productStatus
+                    }),
+                    success: function(response) {
+                        if (response.code === 0) {
+                            // 修改成功，关闭模态框并刷新数据
+                            const modal = bootstrap.Modal.getInstance($('#editStatusModal'));
+                            modal.hide();
+                            loadInventory(currentPage);
+                            
+                            // 显示成功提示
+                            alert('商品状态修改成功！');
+                        } else {
+                            // 显示失败提示
+                            alert('商品状态修改失败：' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('修改商品状态失败:', error);
+                        alert('修改商品状态失败，请重试！');
+                    }
+                });
+            });
+            
+            // 初始化加载数据
+            loadInventory(1);
+        });
+    </script>
+</body>
+</html>

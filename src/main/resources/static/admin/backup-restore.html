@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据备份恢复 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        /* 表格样式 */
+        .table {
+            color: var(--text-color);
+        }
+
+        .table th {
+            background-color: var(--light-color);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table td {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: var(--light-color);
+        }
+
+        /* 备份恢复区域 */
+        .backup-section {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .backup-section h3 {
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        .backup-section p {
+            margin-bottom: 30px;
+            color: var(--secondary-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">系统管理员中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="user-management.html"><i class="fa fa-users"></i> 用户管理</a></li>
+            <li><a href="system-settings.html"><i class="fa fa-cog"></i> 系统设置</a></li>
+            <li><a href="operation-log.html"><i class="fa fa-history"></i> 操作日志</a></li>
+            <li><a href="backup-restore.html" class="active"><i class="fa fa-database"></i> 数据备份恢复</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">数据备份恢复</h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 数据备份区域 -->
+        <div class="backup-section">
+            <h3>数据备份</h3>
+            <p>创建系统数据的完整备份，包括用户、订单、库存等所有数据</p>
+            <button class="btn btn-primary" id="createBackupBtn">
+                <i class="fa fa-download"></i> 创建备份
+            </button>
+        </div>
+
+        <!-- 数据恢复区域 -->
+        <div class="backup-section">
+            <h3>数据恢复</h3>
+            <p>从备份文件中恢复系统数据，请谨慎操作，此操作将覆盖现有数据</p>
+            <form id="restoreForm" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <input type="file" class="form-control" id="backupFile" name="backupFile" accept=".sql,.zip" required>
+                </div>
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa fa-upload"></i> 恢复数据
+                </button>
+            </form>
+        </div>
+
+        <!-- 备份历史记录 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">备份历史记录</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>备份ID</th>
+                                <th>备份文件名</th>
+                                <th>备份大小</th>
+                                <th>备份时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="backupHistory">
+                            <!-- 备份历史数据将通过AJAX加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入通用JS -->
+    <script src="../common.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 使用通用的退出登录函数
+                logout();
+            });
+            
+            // 创建备份
+            $('#createBackupBtn').click(function() {
+                if (confirm('确定要创建数据备份吗？此操作可能需要一些时间，请耐心等待。')) {
+                    $.ajax({
+                        url: '/api/admin/backup',
+                        type: 'POST',
+                        success: function(response) {
+                            if (response.code === 0) {
+                                alert('数据备份创建成功！备份文件已保存到服务器的 D:/logistic_backups 目录，您可以在备份历史中下载。');
+                                loadBackupHistory();
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('创建备份失败:', error);
+                            alert('数据备份创建失败！');
+                        }
+                    });
+                }
+            });
+            
+            // 恢复数据
+            $('#restoreForm').submit(function(e) {
+                e.preventDefault();
+                
+                if (!confirm('确定要恢复数据吗？此操作将覆盖现有数据，操作不可逆！')) {
+                    return;
+                }
+                
+                const formData = new FormData(this);
+                
+                $.ajax({
+                    url: '/api/admin/restore',
+                    type: 'POST',
+                    processData: false,
+                    contentType: false,
+                    data: formData,
+                    success: function(response) {
+                        if (response.code === 0) {
+                            alert('数据恢复成功！');
+                            loadBackupHistory();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('恢复数据失败:', error);
+                        alert('数据恢复失败！');
+                    }
+                });
+            });
+            
+            // 加载备份历史记录
+            function loadBackupHistory() {
+                $.ajax({
+                    url: '/api/admin/backup/history',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const backups = response.data;
+                            const tbody = $('#backupHistory');
+                            tbody.empty();
+                            
+                            backups.forEach(backup => {
+                                const row = `
+                                    <tr>
+                                        <td>${backup.backupId}</td>
+                                        <td>${backup.backupId}.sql</td>
+                                        <td>${backup.size}</td>
+                                        <td>${backup.backupTime}</td>
+                                        <td>
+                                            <a href="/api/admin/backup/download/${backup.backupId}" class="btn btn-sm btn-primary"><i class="fa fa-download"></i> 下载</a>
+                                            <button class="btn btn-sm btn-danger" onclick="alert('删除功能尚未实现')"><i class="fa fa-trash"></i> 删除</button>
+                                        </td>
+                                    </tr>
+                                `;
+                                tbody.append(row);
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载备份历史失败:', error);
+                    }
+                });
+            }
+            
+            // 删除备份
+            function deleteBackup(backupId) {
+                alert('删除功能尚未实现');
+            }
+            
+            // 初始化页面
+            loadBackupHistory();
+        });
+    </script>
+</body>
+</html>

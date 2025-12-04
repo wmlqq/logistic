@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>收货地址 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            background-color: var(--light-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+            background-color: var(--light-color);
+            color: var(--text-color);
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #5c636a;
+            border-color: #565e64;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #bb2d3b;
+            border-color: #b02a37;
+        }
+
+        /* 地址卡片 */
+        .address-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: var(--card-background);
+            position: relative;
+        }
+
+        .address-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .address-card.default {
+            border-color: var(--primary-color);
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+
+        .default-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .address-info {
+            margin-bottom: 15px;
+        }
+
+        .address-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .address-phone {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .address-detail {
+            line-height: 1.5;
+        }
+
+        .address-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* 模态框样式 */
+        .modal-content {
+            background-color: var(--card-background);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .modal-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-footer {
+            background-color: var(--light-color);
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .address-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">客户中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="order.html"><i class="fa fa-shopping-cart"></i> 我的订单</a></li>
+            <li><a href="create-order.html"><i class="fa fa-plus-circle"></i> 新建订单</a></li>
+            <li><a href="profile.html"><i class="fa fa-user"></i> 个人资料</a></li>
+            <li><a href="address.html" class="active"><i class="fa fa-map-marker"></i> 收货地址</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">收货地址管理</h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 地址管理 -->
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title">我的收货地址</h5>
+                    <button class="btn btn-primary" id="addAddressBtn">
+                        <i class="fa fa-plus"></i> 添加新地址
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="addressList">
+                    <!-- 地址列表将通过AJAX加载 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑地址模态框 -->
+    <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addressModalLabel">添加新地址</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addressForm">
+                        <input type="hidden" id="addressId" name="addressId">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="consigneeName" class="form-label">收货人姓名</label>
+                                    <input type="text" class="form-control" id="consigneeName" name="consigneeName" placeholder="请输入收货人姓名" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="consigneePhone" class="form-label">收货人电话</label>
+                                    <input type="tel" class="form-control" id="consigneePhone" name="consigneePhone" placeholder="请输入收货人电话" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="province" class="form-label">省份</label>
+                            <input type="text" class="form-control" id="province" name="province" placeholder="请输入省份" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="city" class="form-label">城市</label>
+                            <input type="text" class="form-control" id="city" name="city" placeholder="请输入城市" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="district" class="form-label">区县</label>
+                            <input type="text" class="form-control" id="district" name="district" placeholder="请输入区县" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="detailAddress" class="form-label">详细地址</label>
+                            <textarea class="form-control" id="detailAddress" name="detailAddress" rows="3" placeholder="请输入详细地址" required></textarea>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="isDefault" name="isDefault">
+                            <label class="form-check-label" for="isDefault">设为默认地址</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" form="addressForm">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入通用JS -->
+    <script src="../common.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 清除localStorage中的用户信息
+                localStorage.removeItem('userInfo');
+                // 调用退出登录API
+                $.ajax({
+                    url: '/api/logout',
+                    type: 'POST',
+                    success: function(response) {
+                        // 退出成功，跳转到登录页面
+                        window.location.href = '../login.html';
+                    },
+                    error: function(xhr, status, error) {
+                        // 退出失败，直接跳转到登录页面
+                        window.location.href = '../login.html';
+                    }
+                });
+            });
+            
+            // 模态框实例
+            const addressModal = new bootstrap.Modal('#addressModal');
+            
+            // 加载地址列表
+            function loadAddressList() {
+                $.ajax({
+                    url: '/api/customer/addresses',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const addresses = response.data;
+                            const addressList = $('#addressList');
+                            addressList.empty();
+
+                            if (addresses.length === 0) {
+                                addressList.html('<p class="text-center text-secondary">暂无收货地址</p>');
+                                return;
+                            }
+
+                            addresses.forEach(address => {
+                                const addressCard = $('<div>').addClass('address-card').toggleClass('default', address.isDefault);
+                                
+                                if (address.isDefault) {
+                                    addressCard.append($('<span>').addClass('default-badge').text('默认'));
+                                }
+                                
+                                const addressInfo = $('<div>').addClass('address-info');
+                                addressInfo.append($('<div>').addClass('address-name').text(address.receiverName));
+                                addressInfo.append($('<div>').addClass('address-phone').text(address.receiverPhone));
+                                addressInfo.append($('<div>').addClass('address-detail').text(address.receiverAddress));
+                                
+                                const addressActions = $('<div>').addClass('address-actions');
+                                addressActions.append($('<button>').addClass('btn btn-sm btn-primary edit-btn').attr('data-id', address.addressId).html('<i class="fa fa-edit"></i> 编辑'));
+                                if (!address.isDefault) {
+                                    addressActions.append($('<button>').addClass('btn btn-sm btn-secondary default-btn').attr('data-id', address.addressId).html('<i class="fa fa-star"></i> 设为默认'));
+                                }
+                                addressActions.append($('<button>').addClass('btn btn-sm btn-danger delete-btn').attr('data-id', address.addressId).html('<i class="fa fa-trash"></i> 删除'));
+                                
+                                addressCard.append(addressInfo).append(addressActions);
+                                addressList.append(addressCard);
+                            });
+
+                            // 重新绑定事件
+                            bindAddressEvents();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载地址列表失败:', error);
+                        $('#addressList').html('<p class="text-center text-danger">加载地址列表失败，请刷新页面重试</p>');
+                    }
+                });
+            }
+            
+            // 加载地址用于编辑
+            function loadAddressForEdit(addressId) {
+                // 从地址列表中查找要编辑的地址
+                $.ajax({
+                    url: '/api/customer/addresses',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const addresses = response.data;
+                            const address = addresses.find(a => a.addressId === addressId);
+                            if (address) {
+                                $('#addressId').val(address.addressId);
+                                $('#consigneeName').val(address.receiverName);
+                                $('#consigneePhone').val(address.receiverPhone);
+                                // 解析地址
+                                const fullAddress = address.receiverAddress;
+                                // 简单处理，实际项目中应该从地址对象中获取省份、城市、区县和详细地址
+                                $('#province').val('');
+                                $('#city').val('');
+                                $('#district').val('');
+                                $('#detailAddress').val(fullAddress);
+                                $('#isDefault').prop('checked', address.isDefault);
+                                $('#addressModalLabel').text('编辑地址');
+                                addressModal.show();
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载地址失败:', error);
+                    }
+                });
+            }
+            
+            // 保存地址
+            $('#addressForm').submit(function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    receiverName: $('#consigneeName').val(),
+                    receiverPhone: $('#consigneePhone').val(),
+                    province: $('#province').val(),
+                    city: $('#city').val(),
+                    district: $('#district').val(),
+                    detailAddress: $('#detailAddress').val(),
+                    isDefault: $('#isDefault').prop('checked')
+                };
+                
+                const method = $('#addressId').val() ? 'PUT' : 'POST';
+                const url = $('#addressId').val() ? `/api/customer/addresses/${$('#addressId').val()}` : '/api/customer/addresses';
+                
+                $.ajax({
+                    url: url,
+                    type: method,
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function(response) {
+                        if (response.code === 0) {
+                            addressModal.hide();
+                            loadAddressList();
+                        } else {
+                            alert('保存失败：' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('保存地址失败:', error);
+                        alert('保存失败，请稍后重试');
+                    }
+                });
+            });
+            
+            // 设为默认地址
+            function setDefaultAddress(addressId) {
+                // 先获取所有地址
+                $.ajax({
+                    url: '/api/customer/addresses',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const addresses = response.data;
+                            // 先将所有地址设为非默认
+                            addresses.forEach(address => {
+                                const updateData = {
+                                    receiverName: address.receiverName,
+                                    receiverPhone: address.receiverPhone,
+                                    province: '',
+                                    city: '',
+                                    district: '',
+                                    detailAddress: address.receiverAddress,
+                                    isDefault: address.addressId === addressId
+                                };
+                                
+                                $.ajax({
+                                    url: `/api/customer/addresses/${address.addressId}`,
+                                    type: 'PUT',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify(updateData),
+                                    success: function() {
+                                        // 最后一个地址更新完成后，重新加载地址列表
+                                        if (address.addressId === addresses[addresses.length - 1].addressId) {
+                                            loadAddressList();
+                                        }
+                                    },
+                                    error: function(xhr, status, error) {
+                                        console.error('更新地址失败:', error);
+                                    }
+                                });
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载地址失败:', error);
+                    }
+                });
+            }
+            
+            // 删除地址
+            function deleteAddress(addressId) {
+                if (confirm('确定要删除这个地址吗？')) {
+                    $.ajax({
+                        url: `/api/customer/addresses/${addressId}`,
+                        type: 'DELETE',
+                        success: function(response) {
+                            if (response.code === 0) {
+                                loadAddressList();
+                            } else {
+                                alert('删除失败：' + response.message);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('删除地址失败:', error);
+                            alert('删除失败，请稍后重试');
+                        }
+                    });
+                }
+            }
+            
+            // 打开添加地址模态框
+            $('#addAddressBtn').click(function() {
+                $('#addressForm')[0].reset();
+                $('#addressId').val('');
+                $('#addressModalLabel').text('添加新地址');
+                addressModal.show();
+            });
+            
+            // 初始化页面数据
+            loadAddressList();
+        });
+    </script>
+</body>
+</html>

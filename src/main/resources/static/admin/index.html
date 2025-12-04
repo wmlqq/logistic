@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统管理员中心 - XX物流管理平台</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #f8f9fa;
+            --border-color: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--light-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .top-nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        /* 统计卡片 */
+        .stats-card {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .stats-number {
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .stats-label {
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa fa-truck"></i>
+            </div>
+            <h3 class="sidebar-title">系统管理员中心</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html" class="active"><i class="fa fa-dashboard"></i> 仪表盘</a></li>
+            <li><a href="user-management.html"><i class="fa fa-users"></i> 用户管理</a></li>
+            <li><a href="system-settings.html"><i class="fa fa-cog"></i> 系统设置</a></li>
+            <li><a href="operation-log.html"><i class="fa fa-history"></i> 操作日志</a></li>
+            <li><a href="backup-restore.html"><i class="fa fa-database"></i> 数据备份恢复</a></li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="top-nav-left">
+                <h2 class="top-nav-title">欢迎回来，<span id="welcomeUsername">用户名</span></h2>
+            </div>
+            <div class="top-nav-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fa fa-moon-o" id="themeIcon"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 仪表盘统计 -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="stats-number" id="totalUsers">0</div>
+                    <div class="stats-label">总用户数</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="stats-number" id="activeUsers">0</div>
+                    <div class="stats-label">活跃用户数</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="stats-number" id="totalRoles">0</div>
+                    <div class="stats-label">角色总数</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="stats-number" id="todayLogins">0</div>
+                    <div class="stats-label">今日登录次数</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统状态 -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">系统状态</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <td><strong>系统版本</strong></td>
+                                        <td id="systemVersion">v1.0.0</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>服务器IP</strong></td>
+                                        <td id="serverIp">127.0.0.1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>运行时间</strong></td>
+                                        <td id="uptime">0天 0小时 0分钟</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>CPU使用率</strong></td>
+                                        <td id="cpuUsage">0%</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>内存使用率</strong></td>
+                                        <td id="memoryUsage">0%</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>磁盘使用率</strong></td>
+                                        <td id="diskUsage">0%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">最近登录记录</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>用户名</th>
+                                        <th>角色</th>
+                                        <th>登录时间</th>
+                                        <th>登录IP</th>
+                                        <th>状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentLogins">
+                                    <!-- 最近登录记录将通过AJAX加载 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入通用JS -->
+    <script src="../common.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 从localStorage获取用户信息
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            
+            // 更新欢迎信息和用户名称
+            if (userInfo) {
+                $('#welcomeUsername').text(userInfo.username);
+                $('.user-name').text(userInfo.username);
+            }
+            
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                // 调用退出登录API
+                $.ajax({
+                    url: '/api/logout',
+                    type: 'POST',
+                    success: function(response) {
+                        // 退出成功，跳转到登录页面
+                        window.location.href = '../login.html';
+                    },
+                    error: function(xhr, status, error) {
+                        // 退出失败，直接跳转到登录页面
+                        window.location.href = '../login.html';
+                    }
+                });
+            });
+            
+            // 加载统计数据
+            function loadStats() {
+                $.ajax({
+                    url: '/api/admin/stats',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const stats = response.data;
+                            $('#totalUsers').text(stats.totalUsers || 0);
+                            $('#activeUsers').text(stats.activeUsers || 0);
+                            $('#totalRoles').text(stats.totalRoles || 0);
+                            $('#todayLogins').text(stats.todayLogins || 0);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载统计数据失败:', error);
+                    }
+                });
+            }
+            
+            // 加载系统状态
+            function loadSystemStatus() {
+                $.ajax({
+                    url: '/api/admin/system/status',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const status = response.data;
+                            $('#systemVersion').text(status.systemVersion || 'v1.0.0');
+                            $('#serverIp').text(status.serverIp || '127.0.0.1');
+                            $('#uptime').text(status.uptime || '0天 0小时 0分钟');
+                            $('#cpuUsage').text(status.cpuUsage || '0%');
+                            $('#memoryUsage').text(status.memoryUsage || '0%');
+                            $('#diskUsage').text(status.diskUsage || '0%');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载系统状态失败:', error);
+                    }
+                });
+            }
+            
+            // 加载最近登录记录
+            function loadRecentLogins() {
+                $.ajax({
+                    url: '/api/admin/logins/recent',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            const logins = response.data;
+                            const tbody = $('#recentLogins');
+                            tbody.empty();
+                            
+                            logins.forEach(login => {
+                                const statusText = login.status === 'SUCCESS' ? '成功' : '失败';
+                                const statusClass = login.status === 'SUCCESS' ? 'success' : 'danger';
+                                
+                                const row = `
+                                    <tr>
+                                        <td>${login.username}</td>
+                                        <td>${login.role}</td>
+                                        <td>${login.loginTime}</td>
+                                        <td>${login.loginIp}</td>
+                                        <td><span class="badge bg-${statusClass}">${statusText}</span></td>
+                                    </tr>
+                                `;
+                                tbody.append(row);
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载最近登录记录失败:', error);
+                    }
+                });
+            }
+            
+            // 初始化页面数据
+            loadStats();
+            loadSystemStatus();
+            loadRecentLogins();
+            
+            // 定时刷新系统状态
+            setInterval(function() {
+                loadSystemStatus();
+            }, 60000); // 每分钟刷新一次
+        });
+    </script>
+</body>
+</html>
