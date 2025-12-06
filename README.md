@@ -56,7 +56,7 @@ CREATE DATABASE IF NOT EXISTS mylogistic CHARACTER SET utf8mb4 COLLATE utf8mb4_u
 - **方法一**：在MySQL命令行中执行
   ```sql
   USE mylogistic;
-  SOURCE /path/to/mylogistic_backup.sql;
+SOURCE /path/to/mylogistic_backup.sql;
   ```
   （将`/path/to/`替换为实际备份文件路径）
 
