@@ -56,4 +56,15 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
      * 根据状态统计商品数量
      */
     long countByStatus(Integer status);
+    
+    /**
+     * 根据仓库ID查询商品
+     */
+    List<Product> findByLocationId(Long locationId);
+    
+    /**
+     * 根据仓库ID查询库存小于预警阈值的商品
+     */
+    @Query("select p from Product p where p.location.id = :locationId and p.stock < p.alertThreshold")
+    List<Product> findByLocationIdAndStockLessThanAlertThreshold(@Param("locationId") Long locationId);
 }

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -22,4 +23,9 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
      */
     @Query("select distinct e.expenseType from Expense e")
     List<String> findDistinctExpenseType();
+    
+    /**
+     * 根据创建时间范围查询费用
+     */
+    List<Expense> findByCreateTimeBetween(Date startDate, Date endDate);
 }

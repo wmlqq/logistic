@@ -9,7 +9,7 @@
     <!-- 引入Font Awesome图标 -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <!-- 引入Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
     <style>
         /* 基础样式 */
         :root {
@@ -336,6 +336,8 @@
                             <select class="form-select" id="reportType" required>
                                 <option value="orders">订单报表</option>
                                 <option value="delivery-efficiency">配送效率报表</option>
+                                <option value="financial">财务报表</option>
+                                <option value="delivery-production">配送生产报表</option>
                             </select>
                         </div>
                     </div>
@@ -376,6 +378,30 @@
             <div class="card-body">
                 <div class="chart-container">
                     <canvas id="deliveryEfficiencyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 财务报表 -->
+        <div class="card" id="financialReportCard" style="display: none;">
+            <div class="card-header">
+                <h5 class="card-title">财务报表</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="financialChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 配送生产报表 -->
+        <div class="card" id="deliveryProductionCard" style="display: none;">
+            <div class="card-header">
+                <h5 class="card-title">配送生产报表</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="deliveryProductionChart"></canvas>
                 </div>
             </div>
         </div>
@@ -434,7 +460,7 @@
                         datasets: [
                             {
                                 label: '订单数量',
-                                data: data.map(item => item.orderCount),
+                                data: data.map(item => parseInt(item.orderCount)),
                                 borderColor: '#0d6efd',
                                 backgroundColor: 'rgba(13, 110, 253, 0.1)',
                                 tension: 0.1,
@@ -442,7 +468,7 @@
                             },
                             {
                                 label: '订单金额',
-                                data: data.map(item => item.totalAmount),
+                                data: data.map(item => parseFloat(item.totalAmount)),
                                 borderColor: '#198754',
                                 backgroundColor: 'rgba(25, 135, 84, 0.1)',
                                 tension: 0.1,
@@ -463,7 +489,23 @@
                             },
                             tooltip: {
                                 mode: 'index',
-                                intersect: false
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            if (context.dataset.label === '订单金额') {
+                                                label += new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'CNY' }).format(context.parsed.y);
+                                            } else {
+                                                label += context.parsed.y;
+                                            }
+                                        }
+                                        return label;
+                                    }
+                                }
                             }
                         },
                         scales: {
@@ -474,7 +516,8 @@
                                 title: {
                                     display: true,
                                     text: '订单数量'
-                                }
+                                },
+                                beginAtZero: true
                             },
                             y1: {
                                 type: 'linear',
@@ -486,7 +529,8 @@
                                 },
                                 grid: {
                                     drawOnChartArea: false
-                                }
+                                },
+                                beginAtZero: true
                             }
                         }
                     }
@@ -509,15 +553,24 @@
                         datasets: [
                             {
                                 label: '完成任务数',
-                                data: data.map(item => item.completedTasks),
-                                backgroundColor: '#0d6efd'
+                                data: data.map(item => parseInt(item.completedTasks)),
+                                backgroundColor: '#0d6efd',
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: '总任务数',
+                                data: data.map(item => parseInt(item.totalTasks)),
+                                backgroundColor: '#6c757d',
+                                yAxisID: 'y'
                             },
                             {
                                 label: '配送效率 (%)',
-                                data: data.map(item => item.efficiency),
+                                data: data.map(item => parseFloat(item.efficiency)),
                                 backgroundColor: '#198754',
                                 type: 'line',
-                                yAxisID: 'y1'
+                                yAxisID: 'y1',
+                                borderWidth: 2,
+                                fill: false
                             }
                         ]
                     },
@@ -527,6 +580,24 @@
                         plugins: {
                             legend: {
                                 position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            if (context.dataset.label === '配送效率 (%)') {
+                                                label += context.parsed.y + '%';
+                                            } else {
+                                                label += context.parsed.y;
+                                            }
+                                        }
+                                        return label;
+                                    }
+                                }
                             }
                         },
                         scales: {
@@ -536,8 +607,9 @@
                                 position: 'left',
                                 title: {
                                     display: true,
-                                    text: '完成任务数'
-                                }
+                                    text: '任务数量'
+                                },
+                                beginAtZero: true
                             },
                             y1: {
                                 type: 'linear',
@@ -549,7 +621,166 @@
                                 },
                                 grid: {
                                     drawOnChartArea: false
+                                },
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 初始化财务报表图表
+            let financialChart = null;
+            function initFinancialChart(data) {
+                const ctx = document.getElementById('financialChart').getContext('2d');
+                
+                if (financialChart) {
+                    financialChart.destroy();
+                }
+                
+                financialChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(item => item.date),
+                        datasets: [
+                            {
+                                label: '收入',
+                                data: data.map(item => parseFloat(item.income)),
+                                backgroundColor: '#198754',
+                                yAxisID: 'y'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'CNY' }).format(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
                                 }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: '金额 (元)'
+                                },
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 初始化配送生产报表图表
+            let deliveryProductionChart = null;
+            function initDeliveryProductionChart(data) {
+                const ctx = document.getElementById('deliveryProductionChart').getContext('2d');
+                
+                if (deliveryProductionChart) {
+                    deliveryProductionChart.destroy();
+                }
+                
+                deliveryProductionChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(item => item.date),
+                        datasets: [
+                            {
+                                label: '配送任务数',
+                                data: data.map(item => parseInt(item.taskCount)),
+                                borderColor: '#0d6efd',
+                                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                                tension: 0.1,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: '完成配送数',
+                                data: data.map(item => parseInt(item.completedCount)),
+                                borderColor: '#198754',
+                                backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                                tension: 0.1,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: '配送成功率 (%)',
+                                data: data.map(item => parseFloat(item.successRate)),
+                                borderColor: '#ffc107',
+                                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                                tension: 0.1,
+                                yAxisID: 'y1',
+                                borderWidth: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            if (context.dataset.label === '配送成功率 (%)') {
+                                                label += context.parsed.y + '%';
+                                            } else {
+                                                label += context.parsed.y;
+                                            }
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: '任务数量'
+                                },
+                                beginAtZero: true
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: '成功率 (%)'
+                                },
+                                grid: {
+                                    drawOnChartArea: false
+                                },
+                                beginAtZero: true,
+                                max: 100
                             }
                         }
                     }
@@ -596,6 +827,46 @@
                 });
             }
             
+            // 加载财务报表数据
+            function loadFinancialReport(startDate, endDate) {
+                $.ajax({
+                    url: '/api/manager/reports/finance',
+                    type: 'GET',
+                    data: {
+                        startDate: startDate,
+                        endDate: endDate
+                    },
+                    success: function(response) {
+                        if (response.code === 0) {
+                            initFinancialChart(response.data);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载财务报表失败:', error);
+                    }
+                });
+            }
+            
+            // 加载配送生产报表数据
+            function loadDeliveryProductionReport(startDate, endDate) {
+                $.ajax({
+                    url: '/api/manager/reports/delivery-production',
+                    type: 'GET',
+                    data: {
+                        startDate: startDate,
+                        endDate: endDate
+                    },
+                    success: function(response) {
+                        if (response.code === 0) {
+                            initDeliveryProductionChart(response.data);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('加载配送生产报表失败:', error);
+                    }
+                });
+            }
+            
             // 生成报表
             $('#reportFilterForm').submit(function(e) {
                 e.preventDefault();
@@ -604,14 +875,24 @@
                 const endDate = $('#endDate').val();
                 const reportType = $('#reportType').val();
                 
+                // 隐藏所有报表卡片
+                $('#orderReportCard').hide();
+                $('#deliveryEfficiencyCard').hide();
+                $('#financialReportCard').hide();
+                $('#deliveryProductionCard').hide();
+                
                 if (reportType === 'orders') {
                     $('#orderReportCard').show();
-                    $('#deliveryEfficiencyCard').hide();
                     loadOrderReport(startDate, endDate);
                 } else if (reportType === 'delivery-efficiency') {
-                    $('#orderReportCard').hide();
                     $('#deliveryEfficiencyCard').show();
                     loadDeliveryEfficiencyReport(startDate, endDate);
+                } else if (reportType === 'financial') {
+                    $('#financialReportCard').show();
+                    loadFinancialReport(startDate, endDate);
+                } else if (reportType === 'delivery-production') {
+                    $('#deliveryProductionCard').show();
+                    loadDeliveryProductionReport(startDate, endDate);
                 }
             });
             
@@ -627,10 +908,19 @@
                     exportUrl = `/api/manager/reports/orders/export?startDate=${startDate}&endDate=${endDate}`;
                 } else if (reportType === 'delivery-efficiency') {
                     exportUrl = `/api/manager/reports/delivery-efficiency/export?startDate=${startDate}&endDate=${endDate}`;
+                } else if (reportType === 'financial') {
+                    exportUrl = `/api/manager/reports/financial/export?startDate=${startDate}&endDate=${endDate}`;
+                } else if (reportType === 'delivery-production') {
+                    exportUrl = `/api/manager/reports/delivery-production/export?startDate=${startDate}&endDate=${endDate}`;
                 }
                 
-                // 触发下载
-                window.open(exportUrl, '_blank');
+                // 使用隐藏的a标签触发下载，避免浏览器阻止弹出窗口
+                const a = document.createElement('a');
+                a.href = exportUrl;
+                a.download = '';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
             });
             
             // 初始化页面

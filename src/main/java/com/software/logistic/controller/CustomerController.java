@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -442,6 +443,7 @@ public class CustomerController {
      * @return 添加结果
      */
     @PostMapping("/addresses")
+    @Transactional
     public ResponseResult<?> addAddress(@RequestBody Map<String, Object> addressData, HttpServletRequest request) {
         // 获取当前登录用户
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -500,6 +502,7 @@ public class CustomerController {
      * @return 更新结果
      */
     @PutMapping("/addresses/{addressId}")
+    @Transactional
     public ResponseResult<?> updateAddress(@PathVariable Long addressId, @RequestBody Map<String, Object> addressData, HttpServletRequest request) {
         // 获取当前登录用户
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

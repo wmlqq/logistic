@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
+import java.util.List;
+
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
@@ -56,4 +59,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * 根据配送方式查询订单列表
      */
     Page<Order> findByDeliveryMethod(String deliveryMethod, Pageable pageable);
+    
+    /**
+     * 根据创建时间范围查询订单列表
+     */
+    List<Order> findByCreateTimeBetween(Date startDate, Date endDate);
 }

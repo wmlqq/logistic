@@ -46,4 +46,9 @@ public interface DeliveryTaskRepository extends JpaRepository<DeliveryTask, Long
      * 根据配送员ID和状态查询配送任务列表（分页）
      */
     Page<DeliveryTask> findByDeliveryManIdAndStatus(Long deliveryManId, String status, Pageable pageable);
+    
+    /**
+     * 根据创建时间范围查询配送任务列表
+     */
+    List<DeliveryTask> findByCreateTimeBetween(Date startDate, Date endDate);
 }

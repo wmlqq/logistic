@@ -9,6 +9,7 @@ import com.software.logistic.entity.Product;
 import com.software.logistic.entity.StockChange;
 import com.software.logistic.entity.User;
 import com.software.logistic.repository.DeliveryTaskRepository;
+import com.software.logistic.repository.ExpenseRepository;
 import com.software.logistic.repository.LocationRepository;
 import com.software.logistic.repository.OrderItemRepository;
 import com.software.logistic.repository.OrderRepository;
@@ -17,6 +18,7 @@ import com.software.logistic.repository.StockChangeRepository;
 import com.software.logistic.repository.UserRepository;
 import com.software.logistic.service.OperationLogService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +28,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,6 +58,9 @@ public class ManagerController {
     
     @Autowired
     private StockChangeRepository stockChangeRepository;
+    
+    @Autowired
+    private ExpenseRepository expenseRepository;
     
     @Autowired
     private OperationLogService operationLogService;
@@ -561,18 +568,48 @@ public class ManagerController {
         Location location = locationRepository.findById(warehouseId)
                 .orElseThrow(() -> new RuntimeException("仓库不存在或无权限访问"));
 
+        // 查询该仓库的所有商品
+        List<Product> products = productRepository.findByLocationId(warehouseId);
+        // 查询该仓库的库存预警数量
+        List<Product> alertProducts = productRepository.findByLocationIdAndStockLessThanAlertThreshold(warehouseId);
+        
         // 转换为响应格式
         Map<String, Object> warehouseMap = new HashMap<>();
         warehouseMap.put("warehouseId", location.getId());
         warehouseMap.put("warehouseName", location.getLocationCode());
         warehouseMap.put("address", location.getDescription());
-        warehouseMap.put("managerName", "管理员"); // 模拟数据
-        warehouseMap.put("phone", "13800138000"); // 模拟数据
+        warehouseMap.put("createTime", "2025-01-01"); // 模拟数据
+        warehouseMap.put("warehouseAdmin", "管理员"); // 模拟数据
         warehouseMap.put("totalInventory", location.getUsed());
-        warehouseMap.put("capacity", location.getCapacity());
-        warehouseMap.put("availableSpace", location.getCapacity() - location.getUsed());
+        warehouseMap.put("productTypes", products.size());
+        warehouseMap.put("inventoryAlerts", alertProducts.size());
+        warehouseMap.put("pendingOutbound", 0); // 模拟数据
 
         return ResponseResult.success("成功", warehouseMap);
+    }
+    
+    /**
+     * 物流经理查看仓库库存明细
+     * @param warehouseId 仓库ID
+     * @return 库存明细
+     */
+    @GetMapping("/warehouses/{warehouseId}/inventory")
+    public ResponseResult<?> getWarehouseInventory(@PathVariable Long warehouseId) {
+        // 查询该仓库的所有商品
+        List<Product> products = productRepository.findByLocationId(warehouseId);
+        
+        // 转换为响应格式
+        List<Map<String, Object>> inventoryList = products.stream().map(product -> {
+            Map<String, Object> inventoryMap = new HashMap<>();
+            inventoryMap.put("productId", product.getId());
+            inventoryMap.put("productName", product.getProductName());
+            inventoryMap.put("currentStock", product.getStock());
+            inventoryMap.put("alertThreshold", product.getAlertThreshold());
+            inventoryMap.put("unit", "件"); // 模拟数据
+            return inventoryMap;
+        }).collect(Collectors.toList());
+
+        return ResponseResult.success("成功", inventoryList);
     }
 
     /**
@@ -609,21 +646,53 @@ public class ManagerController {
     public ResponseResult<?> getOrderReport(
             @RequestParam String startDate,
             @RequestParam String endDate) {
-        // 生成模拟数据
-        List<Map<String, Object>> reportData = new ArrayList<>();
-        
-        // 生成最近30天的模拟数据
-        for (int i = 29; i >= 0; i--) {
-            Map<String, Object> data = new HashMap<>();
+        try {
+            // 解析日期参数
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date start = sdf.parse(startDate);
+            Date end = sdf.parse(endDate);
+            
+            // 查询日期范围内的所有订单
+            List<Order> orders = orderRepository.findByCreateTimeBetween(start, end);
+            
+            // 按日期分组统计订单数量和总金额
+            Map<String, Map<String, Object>> dailyMap = new LinkedHashMap<>();
+            
+            // 初始化日期范围内的所有日期
             Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.DAY_OF_MONTH, -i);
-            data.put("date", new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime()));
-            data.put("orderCount", (int) (Math.random() * 50) + 10); // 10-60个订单
-            data.put("totalAmount", (int) (Math.random() * 5000) + 1000); // 1000-6000元
-            reportData.add(data);
+            cal.setTime(start);
+            while (!cal.getTime().after(end)) {
+                String dateStr = sdf.format(cal.getTime());
+                Map<String, Object> dailyData = new HashMap<>();
+                dailyData.put("date", dateStr);
+                dailyData.put("orderCount", 0L);
+                dailyData.put("totalAmount", BigDecimal.ZERO);
+                dailyMap.put(dateStr, dailyData);
+                cal.add(Calendar.DAY_OF_MONTH, 1);
+            }
+            
+            // 统计订单数据
+            for (Order order : orders) {
+                String dateStr = sdf.format(order.getCreateTime());
+                if (dailyMap.containsKey(dateStr)) {
+                    Map<String, Object> dailyData = dailyMap.get(dateStr);
+                    // 更新订单数量
+                    long currentCount = (long) dailyData.get("orderCount");
+                    dailyData.put("orderCount", currentCount + 1);
+                    // 更新总金额
+                    BigDecimal currentAmount = (BigDecimal) dailyData.get("totalAmount");
+                    dailyData.put("totalAmount", currentAmount.add(order.getTotalAmount()));
+                }
+            }
+            
+            // 转换为列表格式
+            List<Map<String, Object>> reportData = new ArrayList<>(dailyMap.values());
+            
+            return ResponseResult.success("成功", reportData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseResult.error("生成报表失败：" + e.getMessage());
         }
-        
-        return ResponseResult.success("成功", reportData);
     }
 
     /**
@@ -636,181 +705,469 @@ public class ManagerController {
     public ResponseResult<?> getDeliveryEfficiencyReport(
             @RequestParam String startDate,
             @RequestParam String endDate) {
-        // 生成模拟数据
-        List<Map<String, Object>> reportData = new ArrayList<>();
-        
-        // 模拟5个配送员的数据
-        String[] deliveryNames = {"张三", "李四", "王五", "赵六", "钱七"};
-        for (String name : deliveryNames) {
-            Map<String, Object> data = new HashMap<>();
-            data.put("deliveryName", name);
-            data.put("completedTasks", (int) (Math.random() * 30) + 10); // 10-40个任务
-            data.put("efficiency", Math.round(Math.random() * 20) + 80); // 80-100%效率
-            reportData.add(data);
+        try {
+            // 解析日期参数
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date start = sdf.parse(startDate);
+            Date end = sdf.parse(endDate);
+            
+            // 查询日期范围内的所有配送任务
+            List<DeliveryTask> tasks = deliveryTaskRepository.findByCreateTimeBetween(start, end);
+            
+            // 按配送员分组统计
+            Map<Long, Map<String, Object>> deliveryManMap = new HashMap<>();
+            
+            // 统计配送任务数据
+            for (DeliveryTask task : tasks) {
+                Long deliveryManId = task.getDeliveryManId();
+                String deliveryManName = task.getDeliveryManName();
+                
+                // 初始化配送员数据
+                deliveryManMap.computeIfAbsent(deliveryManId, k -> {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("deliveryName", deliveryManName);
+                    data.put("completedTasks", 0L);
+                    data.put("totalTasks", 0L);
+                    return data;
+                });
+                
+                Map<String, Object> data = deliveryManMap.get(deliveryManId);
+                // 更新总任务数
+                long totalTasks = (long) data.get("totalTasks");
+                data.put("totalTasks", totalTasks + 1);
+                
+                // 更新已完成任务数
+                if ("COMPLETED".equals(task.getStatus())) {
+                    long completedTasks = (long) data.get("completedTasks");
+                    data.put("completedTasks", completedTasks + 1);
+                }
+            }
+            
+            // 计算效率并转换为列表格式
+            List<Map<String, Object>> reportData = new ArrayList<>();
+            for (Map<String, Object> data : deliveryManMap.values()) {
+                long totalTasks = (long) data.get("totalTasks");
+                long completedTasks = (long) data.get("completedTasks");
+                
+                // 计算配送效率（保留两位小数）
+                double efficiency = totalTasks > 0 ? Math.round((completedTasks * 100.0 / totalTasks) * 100) / 100.0 : 0.0;
+                data.put("efficiency", efficiency);
+                
+                reportData.add(data);
+            }
+            
+            // 按效率降序排序
+            reportData.sort((a, b) -> Double.compare((double) b.get("efficiency"), (double) a.get("efficiency")));
+            
+            return ResponseResult.success("成功", reportData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseResult.error("生成报表失败：" + e.getMessage());
         }
-        
-        return ResponseResult.success("成功", reportData);
     }
 
     /**
      * 物流经理导出订单报表
      * @param startDate 开始日期
      * @param endDate 结束日期
-     * @return 导出文件
+     * @param response HttpServletResponse
      */
     @GetMapping("/reports/orders/export")
-    public ResponseResult<?> exportOrderReport(
+    public void exportOrderReport(
             @RequestParam String startDate,
-            @RequestParam String endDate) {
-        // 简单返回成功，实际项目中需要实现文件导出逻辑
-        return ResponseResult.success("报表导出成功");
+            @RequestParam String endDate,
+            HttpServletResponse response) {
+        try {
+            // 解析日期参数
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date start = sdf.parse(startDate);
+            Date end = sdf.parse(endDate);
+            
+            // 查询日期范围内的所有订单
+            List<Order> orders = orderRepository.findByCreateTimeBetween(start, end);
+            
+            // 设置响应头
+            response.setContentType("text/csv;charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename=order_report_" + startDate + "_" + endDate + ".csv");
+            
+            // 创建CSV写入器
+            try (PrintWriter writer = response.getWriter()) {
+                // 写入CSV表头
+                writer.println("订单号,客户名称,创建时间,总金额,状态");
+                
+                // 写入数据行
+                for (Order order : orders) {
+                    writer.print(order.getOrderNumber() + ",");
+                    writer.print(order.getCustomerName() + ",");
+                    writer.print(sdf.format(order.getCreateTime()) + ",");
+                    writer.print(order.getTotalAmount() + ",");
+                    writer.println(order.getStatus());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * 物流经理导出配送效率报表
      * @param startDate 开始日期
      * @param endDate 结束日期
-     * @return 导出文件
+     * @param response HttpServletResponse
      */
     @GetMapping("/reports/delivery-efficiency/export")
-    public ResponseResult<?> exportDeliveryEfficiencyReport(
+    public void exportDeliveryEfficiencyReport(
             @RequestParam String startDate,
-            @RequestParam String endDate) {
-        // 简单返回成功，实际项目中需要实现文件导出逻辑
-        return ResponseResult.success("报表导出成功");
-    }
-
-    /**
-     * 物流经理获取配送员列表
-     * @return 配送员列表
-     */
-    @GetMapping("/delivery/men")
-    public ResponseResult<?> getDeliveryMen() {
-        // 查询所有配送员
-        List<User> deliveryMen = userRepository.findByRole("delivery");
-
-        // 转换为响应格式
-        List<Map<String, Object>> result = deliveryMen.stream().map(deliveryMan -> {
-            // 统计配送员的任务数量
-            long pendingTasks = deliveryTaskRepository.countByDeliveryManIdAndStatus(deliveryMan.getId(), "PENDING") + 
-                              deliveryTaskRepository.countByDeliveryManIdAndStatus(deliveryMan.getId(), "ASSIGNED");
-            long deliveringTasks = deliveryTaskRepository.countByDeliveryManIdAndStatus(deliveryMan.getId(), "DELIVERING");
-            long completedTasks = deliveryTaskRepository.countByDeliveryManIdAndStatus(deliveryMan.getId(), "COMPLETED");
+            @RequestParam String endDate,
+            HttpServletResponse response) {
+        try {
+            // 解析日期参数
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date start = sdf.parse(startDate);
+            Date end = sdf.parse(endDate);
             
-            // 动态计算工作状态
-            String workStatus = "AVAILABLE";
-            if (deliveringTasks > 0) {
-                workStatus = "DELIVERING";
+            // 查询日期范围内的所有配送任务
+            List<DeliveryTask> tasks = deliveryTaskRepository.findByCreateTimeBetween(start, end);
+            
+            // 按配送员分组统计
+            Map<Long, Map<String, Object>> deliveryManMap = new HashMap<>();
+            
+            // 统计配送任务数据
+            for (DeliveryTask task : tasks) {
+                Long deliveryManId = task.getDeliveryManId();
+                String deliveryManName = task.getDeliveryManName();
+                
+                // 初始化配送员数据
+                deliveryManMap.computeIfAbsent(deliveryManId, k -> {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("deliveryName", deliveryManName);
+                    data.put("completedTasks", 0L);
+                    data.put("totalTasks", 0L);
+                    return data;
+                });
+                
+                Map<String, Object> data = deliveryManMap.get(deliveryManId);
+                // 更新总任务数
+                long totalTasks = (long) data.get("totalTasks");
+                data.put("totalTasks", totalTasks + 1);
+                
+                // 更新已完成任务数
+                if ("COMPLETED".equals(task.getStatus())) {
+                    long completedTasks = (long) data.get("completedTasks");
+                    data.put("completedTasks", completedTasks + 1);
+                }
             }
             
-            Map<String, Object> deliveryMap = new HashMap<>();
-            deliveryMap.put("deliveryManId", deliveryMan.getId());
-            deliveryMap.put("name", deliveryMan.getUsername());
-            deliveryMap.put("phone", deliveryMan.getPhone());
-            deliveryMap.put("status", workStatus); // 动态计算的工作状态
-            deliveryMap.put("pendingTasks", pendingTasks);
-            deliveryMap.put("completedToday", completedTasks);
-            return deliveryMap;
-        }).collect(Collectors.toList());
-
-        return ResponseResult.success("成功", result);
-    }
-
-    /**
-     * 物流经理获取配送员列表（兼容旧端点）
-     * @return 配送员列表
-     */
-    @GetMapping("/delivery-men")
-    public ResponseResult<?> getDeliveryMenOld() {
-        return getDeliveryMen();
+            // 设置响应头
+            response.setContentType("text/csv;charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename=delivery_efficiency_report_" + startDate + "_" + endDate + ".csv");
+            
+            // 创建CSV写入器
+            try (PrintWriter writer = response.getWriter()) {
+                // 写入CSV表头
+                writer.println("配送员,总任务数,已完成任务数,配送效率(%)");
+                
+                // 写入数据行
+                for (Map<String, Object> data : deliveryManMap.values()) {
+                    String deliveryName = (String) data.get("deliveryName");
+                    long totalTasks = (long) data.get("totalTasks");
+                    long completedTasks = (long) data.get("completedTasks");
+                    double efficiency = totalTasks > 0 ? Math.round((completedTasks * 100.0 / totalTasks) * 100) / 100.0 : 0.0;
+                    
+                    writer.print(deliveryName + ",");
+                    writer.print(totalTasks + ",");
+                    writer.print(completedTasks + ",");
+                    writer.println(efficiency);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     /**
-     * 物流经理查看配送员详情
-     * @param deliveryManId 配送员ID
-     * @return 配送员详情
+     * 物流经理导出财务报表
+     * @param startDate 开始日期
+     * @param endDate 结束日期
+     * @param response HttpServletResponse
      */
-    @GetMapping("/delivery/men/{deliveryManId}")
-    public ResponseResult<?> getDeliveryManDetail(@PathVariable Long deliveryManId) {
-        // 查询配送员
-        User deliveryMan = userRepository.findById(deliveryManId)
-                .filter(u -> "delivery".equals(u.getRole()))
-                .orElseThrow(() -> new RuntimeException("配送员不存在或无权限访问"));
-        
-        // 统计配送员的任务数量
-        long pendingTasks = deliveryTaskRepository.countByDeliveryManIdAndStatus(deliveryManId, "PENDING") + 
-                          deliveryTaskRepository.countByDeliveryManIdAndStatus(deliveryManId, "ASSIGNED");
-        long deliveringTasks = deliveryTaskRepository.countByDeliveryManIdAndStatus(deliveryManId, "DELIVERING");
-        long completedTasks = deliveryTaskRepository.countByDeliveryManIdAndStatus(deliveryManId, "COMPLETED");
-        
-        // 动态计算工作状态
-        String workStatus = "AVAILABLE";
-        if (deliveringTasks > 0) {
-            workStatus = "DELIVERING";
+    @GetMapping("/reports/financial/export")
+    public void exportFinancialReport(
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            HttpServletResponse response) {
+        try {
+            // 解析日期参数
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date start = sdf.parse(startDate);
+            Date end = sdf.parse(endDate);
+            
+            // 查询日期范围内的所有订单（收入）
+            List<Order> orders = orderRepository.findByCreateTimeBetween(start, end);
+            
+            // 按日期分组统计订单收入
+            Map<String, Map<String, Object>> dailyMap = new LinkedHashMap<>();
+            
+            // 初始化日期范围内的所有日期
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(start);
+            while (!cal.getTime().after(end)) {
+                String dateStr = sdf.format(cal.getTime());
+                Map<String, Object> dailyData = new HashMap<>();
+                dailyData.put("date", dateStr);
+                dailyData.put("income", BigDecimal.ZERO);
+                dailyMap.put(dateStr, dailyData);
+                cal.add(Calendar.DAY_OF_MONTH, 1);
+            }
+            
+            // 统计订单收入
+            for (Order order : orders) {
+                String dateStr = sdf.format(order.getCreateTime());
+                if (dailyMap.containsKey(dateStr)) {
+                    Map<String, Object> dailyData = dailyMap.get(dateStr);
+                    BigDecimal currentIncome = (BigDecimal) dailyData.get("income");
+                    dailyData.put("income", currentIncome.add(order.getTotalAmount()));
+                }
+            }
+            
+            // 设置响应头
+            response.setContentType("text/csv;charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename=financial_report_" + startDate + "_" + endDate + ".csv");
+            
+            // 创建CSV写入器
+            try (PrintWriter writer = response.getWriter()) {
+                // 写入CSV表头
+                writer.println("日期,收入");
+                
+                // 写入数据行
+                for (Map<String, Object> data : dailyMap.values()) {
+                    String date = (String) data.get("date");
+                    BigDecimal income = (BigDecimal) data.get("income");
+                    
+                    writer.print(date + ",");
+                    writer.println(income);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        
-        // 转换为响应格式
-        Map<String, Object> deliveryManMap = new HashMap<>();
-        deliveryManMap.put("deliveryManId", deliveryMan.getId());
-        deliveryManMap.put("name", deliveryMan.getUsername());
-        deliveryManMap.put("phone", deliveryMan.getPhone());
-        deliveryManMap.put("email", deliveryMan.getEmail());
-        deliveryManMap.put("status", workStatus); // 动态计算的工作状态
-        deliveryManMap.put("pendingTasks", pendingTasks);
-        deliveryManMap.put("deliveringTasks", deliveringTasks);
-        deliveryManMap.put("completedTasks", completedTasks);
-        deliveryManMap.put("totalTasks", pendingTasks + deliveringTasks + completedTasks);
-        deliveryManMap.put("createTime", deliveryMan.getCreateTime());
-        
-        return ResponseResult.success("成功", deliveryManMap);
     }
-
+    
     /**
-     * 物流经理查看订单详情
-     * @param orderId 订单ID
-     * @return 订单详情
+     * 物流经理导出配送生产报表
+     * @param startDate 开始日期
+     * @param endDate 结束日期
+     * @param response HttpServletResponse
      */
-    @GetMapping("/orders/{orderId}")
-    public ResponseResult<?> getOrderDetail(@PathVariable Long orderId) {
-        // 查询订单，物流经理可以查看所有订单
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("订单不存在或无权限访问"));
-
-        // 查询订单商品
-        List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
-
-        // 转换为响应格式
-        Map<String, Object> orderMap = new HashMap<>();
-        orderMap.put("orderId", order.getId());
-        orderMap.put("orderNumber", order.getOrderNumber());
-        orderMap.put("customerId", order.getCustomerId());
-        orderMap.put("customerName", order.getCustomerName());
-        orderMap.put("createTime", order.getCreateTime());
-        orderMap.put("deliveryMethod", order.getDeliveryMethod());
-        orderMap.put("status", order.getStatus());
-        orderMap.put("totalAmount", order.getTotalAmount());
-        orderMap.put("receiverName", order.getReceiverName());
-        orderMap.put("receiverPhone", order.getReceiverPhone());
-        orderMap.put("receiverAddress", order.getReceiverAddress());
-        orderMap.put("remark", order.getRemark());
-
-        // 转换订单商品数据
-        List<Map<String, Object>> items = orderItems.stream().map(orderItem -> {
-            Map<String, Object> itemMap = new HashMap<>();
-            itemMap.put("productName", orderItem.getProductName());
-            itemMap.put("productCode", orderItem.getProductCode());
-            itemMap.put("quantity", orderItem.getQuantity());
-            itemMap.put("price", orderItem.getPrice());
+    @GetMapping("/reports/delivery-production/export")
+    public void exportDeliveryProductionReport(
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            HttpServletResponse response) {
+        try {
+            // 解析日期参数
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date start = sdf.parse(startDate);
+            Date end = sdf.parse(endDate);
             
-            // 查询商品当前库存
-            Product product = productRepository.findById(orderItem.getProductId())
-                    .orElseThrow(() -> new RuntimeException("商品不存在"));
-            itemMap.put("stock", product.getStock());
+            // 查询日期范围内的所有配送任务
+            List<DeliveryTask> tasks = deliveryTaskRepository.findByCreateTimeBetween(start, end);
             
-            return itemMap;
-        }).collect(Collectors.<Map<String, Object>>toList());
-        orderMap.put("items", items);
-
-        return ResponseResult.success("成功", orderMap);
+            // 按日期分组统计
+            Map<String, Map<String, Object>> dailyMap = new LinkedHashMap<>();
+            
+            // 初始化日期范围内的所有日期
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(start);
+            while (!cal.getTime().after(end)) {
+                String dateStr = sdf.format(cal.getTime());
+                Map<String, Object> dailyData = new HashMap<>();
+                dailyData.put("date", dateStr);
+                dailyData.put("taskCount", 0L);
+                dailyData.put("completedCount", 0L);
+                dailyData.put("successRate", 0.0);
+                dailyMap.put(dateStr, dailyData);
+                cal.add(Calendar.DAY_OF_MONTH, 1);
+            }
+            
+            // 统计配送任务数据
+            for (DeliveryTask task : tasks) {
+                String dateStr = sdf.format(task.getCreateTime());
+                if (dailyMap.containsKey(dateStr)) {
+                    Map<String, Object> dailyData = dailyMap.get(dateStr);
+                    
+                    // 更新总任务数
+                    long taskCount = (long) dailyData.get("taskCount");
+                    dailyData.put("taskCount", taskCount + 1);
+                    
+                    // 更新已完成任务数
+                    if ("COMPLETED".equals(task.getStatus())) {
+                        long completedCount = (long) dailyData.get("completedCount");
+                        dailyData.put("completedCount", completedCount + 1);
+                    }
+                }
+            }
+            
+            // 计算成功率
+            for (Map<String, Object> dailyData : dailyMap.values()) {
+                long taskCount = (long) dailyData.get("taskCount");
+                long completedCount = (long) dailyData.get("completedCount");
+                double successRate = taskCount > 0 ? Math.round(((double) completedCount / taskCount) * 10000) / 100.0 : 0.0;
+                dailyData.put("successRate", successRate);
+            }
+            
+            // 设置响应头
+            response.setContentType("text/csv;charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename=delivery_production_report_" + startDate + "_" + endDate + ".csv");
+            
+            // 创建CSV写入器
+            try (PrintWriter writer = response.getWriter()) {
+                // 写入CSV表头
+                writer.println("日期,总任务数,已完成任务数,成功率(%)");
+                
+                // 写入数据行
+                for (Map<String, Object> data : dailyMap.values()) {
+                    String date = (String) data.get("date");
+                    long taskCount = (long) data.get("taskCount");
+                    long completedCount = (long) data.get("completedCount");
+                    double successRate = (double) data.get("successRate");
+                    
+                    writer.print(date + ",");
+                    writer.print(taskCount + ",");
+                    writer.print(completedCount + ",");
+                    writer.println(successRate);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * 物流经理获取财务报表数据
+     * @param startDate 开始日期
+     * @param endDate 结束日期
+     * @return 财务报表数据
+     */
+    @GetMapping("/reports/finance")
+    public ResponseResult<?> getFinancialReport(
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        try {
+            // 解析日期参数
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date start = sdf.parse(startDate);
+            Date end = sdf.parse(endDate);
+            
+            // 查询日期范围内的所有订单（收入）
+            List<Order> orders = orderRepository.findByCreateTimeBetween(start, end);
+            
+            // 按日期分组统计订单收入
+            Map<String, Map<String, Object>> dailyMap = new LinkedHashMap<>();
+            
+            // 初始化日期范围内的所有日期
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(start);
+            while (!cal.getTime().after(end)) {
+                String dateStr = sdf.format(cal.getTime());
+                Map<String, Object> dailyData = new HashMap<>();
+                dailyData.put("date", dateStr);
+                dailyData.put("income", BigDecimal.ZERO);
+                dailyMap.put(dateStr, dailyData);
+                cal.add(Calendar.DAY_OF_MONTH, 1);
+            }
+            
+            // 统计订单收入
+            for (Order order : orders) {
+                String dateStr = sdf.format(order.getCreateTime());
+                if (dailyMap.containsKey(dateStr)) {
+                    Map<String, Object> dailyData = dailyMap.get(dateStr);
+                    BigDecimal currentIncome = (BigDecimal) dailyData.get("income");
+                    dailyData.put("income", currentIncome.add(order.getTotalAmount()));
+                }
+            }
+            
+            // 转换为列表格式
+            List<Map<String, Object>> reportData = new ArrayList<>(dailyMap.values());
+            
+            return ResponseResult.success("成功", reportData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseResult.error("生成报表失败：" + e.getMessage());
+        }
+    }
+    
+    /**
+     * 物流经理获取配送生产报表数据
+     * @param startDate 开始日期
+     * @param endDate 结束日期
+     * @return 配送生产报表数据
+     */
+    @GetMapping("/reports/delivery-production")
+    public ResponseResult<?> getDeliveryProductionReport(
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        try {
+            // 解析日期参数
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date start = sdf.parse(startDate);
+            Date end = sdf.parse(endDate);
+            
+            // 查询日期范围内的所有配送任务
+            List<DeliveryTask> tasks = deliveryTaskRepository.findByCreateTimeBetween(start, end);
+            
+            // 按日期分组统计
+            Map<String, Map<String, Object>> dailyMap = new LinkedHashMap<>();
+            
+            // 初始化日期范围内的所有日期
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(start);
+            while (!cal.getTime().after(end)) {
+                String dateStr = sdf.format(cal.getTime());
+                Map<String, Object> dailyData = new HashMap<>();
+                dailyData.put("date", dateStr);
+                dailyData.put("taskCount", 0L);
+                dailyData.put("completedCount", 0L);
+                dailyData.put("successRate", 0.0);
+                dailyMap.put(dateStr, dailyData);
+                cal.add(Calendar.DAY_OF_MONTH, 1);
+            }
+            
+            // 统计配送任务数据
+            for (DeliveryTask task : tasks) {
+                String dateStr = sdf.format(task.getCreateTime());
+                if (dailyMap.containsKey(dateStr)) {
+                    Map<String, Object> dailyData = dailyMap.get(dateStr);
+                    
+                    // 更新总任务数
+                    long taskCount = (long) dailyData.get("taskCount");
+                    dailyData.put("taskCount", taskCount + 1);
+                    
+                    // 更新已完成任务数
+                    if ("COMPLETED".equals(task.getStatus())) {
+                        long completedCount = (long) dailyData.get("completedCount");
+                        dailyData.put("completedCount", completedCount + 1);
+                    }
+                }
+            }
+            
+            // 计算成功率并转换为列表格式
+            List<Map<String, Object>> reportData = new ArrayList<>();
+            for (Map<String, Object> dailyData : dailyMap.values()) {
+                long taskCount = (long) dailyData.get("taskCount");
+                long completedCount = (long) dailyData.get("completedCount");
+                
+                // 计算成功率（保留两位小数）
+                double successRate = taskCount > 0 ? Math.round(((double) completedCount / taskCount) * 10000) / 100.0 : 0.0;
+                dailyData.put("successRate", successRate);
+                
+                reportData.add(dailyData);
+            }
+            
+            return ResponseResult.success("成功", reportData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseResult.error("生成报表失败：" + e.getMessage());
+        }
     }
 }

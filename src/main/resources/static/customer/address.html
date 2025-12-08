@@ -643,45 +643,22 @@
             
             // 设为默认地址
             function setDefaultAddress(addressId) {
-                // 先获取所有地址
+                // 直接调用后端更新接口，只传递isDefault字段
                 $.ajax({
-                    url: '/api/customer/addresses',
-                    type: 'GET',
+                    url: `/api/customer/addresses/${addressId}`,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ isDefault: true }),
                     success: function(response) {
                         if (response.code === 0) {
-                            const addresses = response.data;
-                            // 先将所有地址设为非默认
-                            addresses.forEach(address => {
-                                const updateData = {
-                                    receiverName: address.receiverName,
-                                    receiverPhone: address.receiverPhone,
-                                    province: '',
-                                    city: '',
-                                    district: '',
-                                    detailAddress: address.receiverAddress,
-                                    isDefault: address.addressId === addressId
-                                };
-                                
-                                $.ajax({
-                                    url: `/api/customer/addresses/${address.addressId}`,
-                                    type: 'PUT',
-                                    contentType: 'application/json',
-                                    data: JSON.stringify(updateData),
-                                    success: function() {
-                                        // 最后一个地址更新完成后，重新加载地址列表
-                                        if (address.addressId === addresses[addresses.length - 1].addressId) {
-                                            loadAddressList();
-                                        }
-                                    },
-                                    error: function(xhr, status, error) {
-                                        console.error('更新地址失败:', error);
-                                    }
-                                });
-                            });
+                            loadAddressList();
+                        } else {
+                            alert('设置默认地址失败：' + response.message);
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.error('加载地址失败:', error);
+                        console.error('更新地址失败:', error);
+                        alert('设置默认地址失败，请稍后重试');
                     }
                 });
             }
@@ -714,6 +691,27 @@
                 $('#addressModalLabel').text('添加新地址');
                 addressModal.show();
             });
+            
+            // 绑定地址事件
+            function bindAddressEvents() {
+                // 编辑地址
+                $('.edit-btn').click(function() {
+                    const addressId = $(this).data('id');
+                    loadAddressForEdit(addressId);
+                });
+                
+                // 设为默认地址
+                $('.default-btn').click(function() {
+                    const addressId = $(this).data('id');
+                    setDefaultAddress(addressId);
+                });
+                
+                // 删除地址
+                $('.delete-btn').click(function() {
+                    const addressId = $(this).data('id');
+                    deleteAddress(addressId);
+                });
+            }
             
             // 初始化页面数据
             loadAddressList();
