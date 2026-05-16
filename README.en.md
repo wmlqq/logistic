@@ -2,7 +2,7 @@
 
 # Intelligent Logistics Management Platform
 
-**NWPU · Software Engineering Lab G · Multi-role integrated logistics system**
+**Multi-role integrated logistics system**
 
 [![Java](https://img.shields.io/badge/Java-17-orange?logo=openjdk&logoColor=white)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.8-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)

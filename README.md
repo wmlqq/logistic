@@ -2,7 +2,7 @@
 
 # 智能物流管理平台
 
-**西北工业大学 · 软件工程实验 G · 多角色一体化物流业务系统**
+**多角色一体化物流业务系统**
 
 [![Java](https://img.shields.io/badge/Java-17-orange?logo=openjdk&logoColor=white)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.8-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
