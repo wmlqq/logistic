@@ -1,0 +1,71 @@
+' 全局样式优化
+skinparam backgroundColor #FFFFFF
+skinparam rectangle {
+  backgroundColor #F5F9FF
+  borderColor #2E5A88
+  fontSize 11
+  borderThickness 1
+}
+skinparam decision {
+  backgroundColor #FFE8E8
+  borderColor #882E2E
+  fontSize 11
+  borderThickness 1
+}
+skinparam label {
+  fontSize 10
+}
+skinparam arrow {
+  color #555555
+  thickness 1
+}
+
+' 流程入口：系统启动
+start
+:系统启动;
+
+' 1. 登录认证环节
+:用户输入登录信息;
+:用户认证处理;
+if (认证成功?) then (是)
+  :进入订单流程;
+else (否)
+  ' 2. 注册环节（认证失败后）
+  :用户输入注册信息;
+  :用户注册处理;
+  if (注册成功?) then (是)
+    :进入订单流程;
+  else (否)
+    :系统提示注册失败;
+    stop
+  endif
+endif
+
+' 3. 订单处理核心流程（复用逻辑，无需重复定义）
+:客户输入订单信息;
+:系统创建订单记录;
+:人工/自动审核订单;
+if (审核通过?) then (是)
+  :检查商品库存数量;
+  if (库存充足?) then (是)
+    :仓库拣货并包装;
+    :系统分配配送任务;
+    :配送员执行配送;
+    if (配送成功?) then (是)
+      :更新订单状态为"完成";
+      :系统显示订单完成结果;
+    else (否)
+      :更新订单状态为"配送失败";
+      :系统显示配送失败原因;
+    endif
+  else (否)
+    :更新订单状态为"库存不足";
+    :系统提示库存不足，订单终止;
+  endif
+else (否)
+  :更新订单状态为"审核驳回";
+  :系统显示审核失败原因;
+endif
+
+' 流程结束
+stop

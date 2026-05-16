@@ -12,19 +12,18 @@
 	<artifactId>logistic</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>logistic</name>
-	<description>Project for Class Software</description>
-	<url/>
+	<description>Intelligent logistics management platform (NWPU Software Engineering course project)</description>
+	<url>https://github.com/wmlqq/logistic</url>
 	<licenses>
-		<license/>
+		<license>
+			<name>MIT License</name>
+			<url>https://opensource.org/licenses/MIT</url>
+		</license>
 	</licenses>
-	<developers>
-		<developer/>
-	</developers>
 	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
+		<connection>scm:git:git://github.com/wmlqq/logistic.git</connection>
+		<developerConnection>scm:git:ssh://github.com:wmlqq/logistic.git</developerConnection>
+		<url>https://github.com/wmlqq/logistic</url>
 	</scm>
 	<properties>
 		<java.version>17</java.version>
@@ -74,6 +73,11 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

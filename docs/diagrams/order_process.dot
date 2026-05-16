@@ -1,0 +1,56 @@
+digraph flowchart {
+    rankdir=TB;
+    
+    // 形状定义
+    start [label="开始", shape=ellipse];
+    end [label="结束", shape=ellipse];
+    
+    // 处理节点（矩形）
+    customer_login [label="客户登录", shape=box];
+    create_order [label="创建订单", shape=box];
+    select_products [label="选择产品", shape=box];
+    fill_address [label="填写收货地址", shape=box];
+    confirm_order [label="确认订单", shape=box];
+    pay_order [label="支付订单", shape=box];
+    manager_review [label="经理审核订单", shape=box];
+    review_fail [label="审核失败", shape=box];
+    warehouse_receive [label="仓库接收订单", shape=box];
+    check_inventory [label="检查库存", shape=box];
+    inventory_shortage [label="库存不足", shape=box];
+    pick_goods [label="拣货", shape=box];
+    pack_goods [label="包装", shape=box];
+    assign_delivery [label="分配配送任务", shape=box];
+    delivery_receive [label="配送员接收任务", shape=box];
+    pickup_goods [label="上门取件", shape=box];
+    deliver_goods [label="配送货物", shape=box];
+    customer_receive [label="客户签收", shape=box];
+    
+    // 决策节点（菱形）
+    review_decision [label="审核通过?", shape=diamond];
+    inventory_decision [label="库存充足?", shape=diamond];
+    
+    // 流程连接
+    start -> customer_login;
+    customer_login -> create_order;
+    create_order -> select_products;
+    select_products -> fill_address;
+    fill_address -> confirm_order;
+    confirm_order -> pay_order;
+    pay_order -> manager_review;
+    manager_review -> review_decision;
+    review_decision -> warehouse_receive [label="是"];
+    review_decision -> review_fail [label="否"];
+    review_fail -> end;
+    warehouse_receive -> check_inventory;
+    check_inventory -> inventory_decision;
+    inventory_decision -> pick_goods [label="是"];
+    inventory_decision -> inventory_shortage [label="否"];
+    inventory_shortage -> end;
+    pick_goods -> pack_goods;
+    pack_goods -> assign_delivery;
+    assign_delivery -> delivery_receive;
+    delivery_receive -> pickup_goods;
+    pickup_goods -> deliver_goods;
+    deliver_goods -> customer_receive;
+    customer_receive -> end;
+}

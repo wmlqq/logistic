@@ -2,18 +2,32 @@ server:
   port: 8080
 
 spring:
+  config:
+    import: optional:classpath:application-local.yaml
   application:
     name: logistic
   datasource:
-    # 替换为你的数据库名（需提前在MySQL中创建）
-    url: jdbc:mysql://localhost:3306/mylogistic?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root  # 你的MySQL用户名（默认通常是root）
-    password: 3141306947w666W@  # 你的MySQL密码
-    driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL 8+ 驱动类名
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/mylogistic?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update  # 自动根据实体类更新数据库表结构
-    show-sql: true      # 在控制台显示执行的 SQL 语句
+      ddl-auto: update
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
     properties:
       hibernate:
-        format_sql: true # 格式化 SQL 输出，便于阅读
+        format_sql: true
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:change-me-use-a-random-string-at-least-32-characters}
+    expiration-days: ${APP_JWT_EXPIRATION_DAYS:7}
+
+dingtalk:
+  robot:
+    webhook: ${DINGTALK_ROBOT_WEBHOOK:}
+
+logistic:
+  backup:
+    directory: ${LOGISTIC_BACKUP_DIR:${user.home}/.logistic/backups}

@@ -1,0 +1,65 @@
+digraph flowchart {
+    rankdir=TB;
+    
+    // 形状定义
+    start [label="系统启动", shape=ellipse];
+    end [label="系统结束", shape=ellipse];
+    
+    // 输入输出节点（平行四边形）
+    user_input [label="用户输入登录信息", shape=parallelogram];
+    register_input [label="用户输入注册信息", shape=parallelogram];
+    order_input [label="客户输入订单信息", shape=parallelogram];
+    system_output [label="系统显示结果", shape=parallelogram];
+    
+    // 处理节点（矩形）
+    auth_process [label="用户认证处理", shape=box];
+    register_process [label="用户注册处理", shape=box];
+    create_order [label="创建订单", shape=box];
+    order_review [label="订单审核", shape=box];
+    inventory_check [label="库存检查", shape=box];
+    picking_packing [label="拣货包装", shape=box];
+    delivery_assign [label="分配配送任务", shape=box];
+    delivery_process [label="配送处理", shape=box];
+    order_complete [label="订单完成", shape=box];
+    
+    // 判断节点（菱形）
+    auth_decision [label="认证成功?", shape=diamond];
+    register_decision [label="注册成功?", shape=diamond];
+    review_decision [label="审核通过?", shape=diamond];
+    inventory_decision [label="库存充足?", shape=diamond];
+    delivery_decision [label="配送成功?", shape=diamond];
+    
+    // 流程连接
+    start -> user_input;
+    user_input -> auth_process;
+    auth_process -> auth_decision;
+    
+    auth_decision -> order_input [label="是"];
+    auth_decision -> register_input [label="否"];
+    
+    register_input -> register_process;
+    register_process -> register_decision;
+    register_decision -> order_input [label="是"];
+    register_decision -> system_output [label="否"];
+    
+    order_input -> create_order;
+    create_order -> order_review;
+    order_review -> review_decision;
+    
+    review_decision -> inventory_check [label="是"];
+    review_decision -> system_output [label="否"];
+    
+    inventory_check -> inventory_decision;
+    inventory_decision -> picking_packing [label="是"];
+    inventory_decision -> system_output [label="否"];
+    
+    picking_packing -> delivery_assign;
+    delivery_assign -> delivery_process;
+    delivery_process -> delivery_decision;
+    
+    delivery_decision -> order_complete [label="是"];
+    delivery_decision -> system_output [label="否"];
+    
+    order_complete -> system_output;
+    system_output -> end;
+}

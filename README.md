@@ -1,190 +1,201 @@
-# 物流管理系统使用说明
+<div align="center">
 
-## 一、项目概述
+# 智能物流管理平台
 
-- **项目名称**：物流管理系统
-- **技术栈**：Spring Boot 3.5.8 + Java 17 + MySQL 8+
-- **构建工具**：Maven
-- **项目类型**：前后端一体化（后端Spring Boot + 前端静态HTML）
+**西北工业大学 · 软件工程实验 G · 多角色一体化物流业务系统**
 
-## 二、环境准备
+[![Java](https://img.shields.io/badge/Java-17-orange?logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.8-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-### 1. 安装Java
-- **版本要求**：JDK 17或更高版本
-- **验证方法**：打开命令行执行
-  ```bash
-  java -version
-  ```
-  输出应包含类似 `java version "17.0.1"` 的信息
+[English](README.en.md) · [在线仓库](https://github.com/wmlqq/logistic)
 
-### 2. 安装MySQL
-- **版本要求**：MySQL 8.0或更高版本
-- **验证方法**：打开命令行执行
-  ```bash
-  mysql --version
-  ```
-  输出应包含类似 `mysql  Ver 8.0.31 for Win64 on x86_64` 的信息
+</div>
 
-### 3. 安装Maven（可选，仅源码方式需要）
-- **版本要求**：Maven 3.6或更高版本
-- **验证方法**：打开命令行执行
-  ```bash
-  mvn --version
-  ```
-  输出应包含Maven版本信息
+---
 
-## 三、数据库恢复
+## 项目简介
 
-### 1. 启动MySQL服务
-- Windows：在服务中启动MySQL服务
-- Linux/macOS：执行 `sudo systemctl start mysql` 或 `brew services start mysql`
+面向课程与展示场景设计的 **B/S 架构智能物流管理系统**：后端提供 REST API 与权限控制，前端以静态页面按角色划分工作台，覆盖下单、仓储、配送、财务与系统运维等完整链路。
 
-### 2. 登录MySQL
-```bash
-mysql -u root -p
+## 技术栈
+
+| 层级 | 技术 |
+|------|------|
+| 语言 / 运行时 | Java 17 |
+| 后端框架 | Spring Boot 3.5、Spring MVC、Spring Data JPA、Spring Security |
+| 认证 | JWT（jjwt 0.12）+ BCrypt 密码 |
+| 数据库 | MySQL 8+ |
+| 其他能力 | Apache POI（Excel）、Spring Mail、钉钉机器人 Webhook（可选） |
+| 构建 | Maven 3.6+（含 Maven Wrapper） |
+| 前端 | HTML5、Bootstrap 5、jQuery、Font Awesome |
+| CI | GitHub Actions |
+
+## 功能概览
+
+| 角色 | 主要能力 |
+|------|----------|
+| 客户 | 注册登录、地址管理、下单与订单跟踪 |
+| 物流经理 | 订单调度、配送员管理、仓库与报表 |
+| 仓库管理员 | 库存、库位、出入库、库存预警 |
+| 配送员 | 配送任务、路线规划 |
+| 财务人员 | 订单与财务报表 |
+| 系统管理员 | 用户与角色、系统设置、操作日志、数据库备份/恢复 |
+
+## 项目结构
+
 ```
-输入MySQL密码后进入MySQL命令行
+logistic/
+├── .github/workflows/     # CI 流水线
+├── database/seed/         # 数据库初始化脚本 backup.sql
+├── docs/diagrams/         # 架构与流程图（Graphviz / PlantUML）
+├── scripts/               # 数据库初始化脚本
+├── src/main/java/         # 后端业务代码
+├── src/main/resources/
+│   ├── application.yaml           # 默认配置（无敏感信息）
+│   ├── application-example.yaml   # 配置示例
+│   └── static/                    # 前端静态资源
+└── pom.xml
+```
 
-### 3. 创建数据库
+## 快速开始
+
+### 环境要求
+
+- JDK **17+**
+- **MySQL 8.0+**（本地或远程）
+- （可选）本机已安装 `mysql` / `mysqldump` 客户端（管理员备份功能需要）
+
+### 1. 克隆仓库
+
+```bash
+git clone https://github.com/wmlqq/logistic.git
+cd logistic
+```
+
+### 2. 初始化数据库
+
+**Windows（PowerShell）：**
+
+```powershell
+.\scripts\init-db.ps1 -User root -Password your_password
+```
+
+**Linux / macOS：**
+
+```bash
+chmod +x scripts/init-db.sh
+./scripts/init-db.sh root your_password
+```
+
+或手动执行：
+
 ```sql
 CREATE DATABASE IF NOT EXISTS mylogistic CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-### 4. 恢复备份数据
-备份数据已放在项目根目录下，文件名为 `mylogistic_backup.sql`
-必须导入否则系统中无系统管理员，系统管理员账号：admin 密码：admin
-- **方法一**：在MySQL命令行中执行
-  ```sql
-  USE mylogistic;
-SOURCE /path/to/mylogistic_backup.sql;
-  ```
-  （将`/path/to/`替换为实际备份文件路径）
-
-- **方法二**：在命令行中执行
-  ```bash
-  mysql -u root -p mylogistic < /path/to/mylogistic_backup.sql
-  ```
-  （将`/path/to/`替换为实际备份文件路径）
-
-### 5. 验证数据恢复
-```sql
-USE mylogistic;
-SHOW TABLES;
-```
-应能看到多个表，说明数据恢复成功
-
-## 四、项目配置修改
-
-### 1. 找到配置文件
-- **源码方式**：`src/main/resources/application.yaml`
-- **Jar方式**：在jar包同级目录创建`application.yaml`文件
-
-### 2. 修改数据库连接信息
-使用文本编辑器打开`application.yaml`文件，修改以下内容：
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/mylogistic?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root  # 替换为你的MySQL用户名
-    password: your_password  # 替换为你的MySQL密码
-    driver-class-name: com.mysql.cj.jdbc.Driver
+```bash
+mysql -u root -p mylogistic < database/seed/backup.sql
 ```
 
-### 3. 其他配置（可选）
-- **端口修改**：如需修改项目端口，可修改`server.port`值
-- **SQL日志**：如需关闭SQL日志，可将`spring.jpa.show-sql`设为`false`
+> 导入种子数据后默认管理员：**用户名 `admin`，密码 `admin`**（BCrypt 存储）。
 
-## 五、项目启动
+### 3. 配置应用
 
-### 方式一：源码方式启动
+复制示例配置并填写本地信息（**勿提交** `application-local.yaml`）：
 
-1. 进入项目根目录
-2. 执行Maven命令启动项目
-   ```bash
-   mvn spring-boot:run
-   ```
-3. 等待项目启动完成，控制台输出类似 `Started LogisticApplication in 5.234 seconds` 的信息
+```bash
+cp src/main/resources/application-example.yaml src/main/resources/application-local.yaml
+```
 
-### 方式二：Jar包方式启动
+编辑 `application-local.yaml`，至少设置：
 
-1. 先打包项目（在项目根目录执行）
-   ```bash
-   mvn clean package -DskipTests
-   ```
-2. 进入`target`目录，找到生成的jar文件（如：`logistic-0.0.1-SNAPSHOT.jar`）
-3. 执行jar文件
-   ```bash
-   java -jar logistic-0.0.1-SNAPSHOT.jar
-   ```
-4. 等待项目启动完成
+- `spring.datasource.username` / `password`
+- `app.jwt.secret`（至少 32 位随机字符串）
+- （可选）`dingtalk.robot.webhook`
 
-## 六、访问项目
+也可通过环境变量覆盖，例如：
 
-### 1. 访问地址
-在浏览器中输入：`http://localhost:8080`
+```bash
+export SPRING_DATASOURCE_PASSWORD=your_password
+export APP_JWT_SECRET=your-long-random-secret
+```
 
-### 2. 登录系统
-- 系统包含多种角色：管理员、客户、配送员、财务、经理、仓库管理员
-- 具体账号密码请查看数据库中的`user`表
+### 4. 启动
 
-## 七、项目结构说明
+```bash
+# 使用 Maven Wrapper（推荐）
+./mvnw spring-boot:run
 
-### 后端结构
-- **controller/**：各种控制器，处理HTTP请求
-- **entity/**：实体类，对应数据库表
-- **repository/**：数据访问层，操作数据库
-- **service/**：业务逻辑层
-- **utils/**：工具类
-- **LogisticApplication.java**：应用入口
+# Windows
+mvnw.cmd spring-boot:run
+```
 
-### 前端结构
-- **static/admin/**：管理员页面
-- **static/customer/**：客户页面
-- **static/delivery/**：配送员页面
-- **static/finance/**：财务页面
-- **static/manager/**：经理页面
-- **static/warehouse/**：仓库管理员页面
-- **static/login.html**：登录页面
-- **static/register.html**：注册页面
+浏览器访问：**http://localhost:8080**
 
-## 八、注意事项
+### 5. 打包运行
 
-1. **Java版本**：项目使用Java 17，必须安装对应版本
-2. **MySQL版本**：推荐使用MySQL 8.0+，确保驱动类名正确
-3. **数据库权限**：确保MySQL用户有创建表、插入数据等权限
-4. **端口占用**：确保8080端口未被其他程序占用
-5. **配置文件格式**：YAML格式对缩进敏感，修改时注意保持正确缩进
-6. **首次启动**：首次启动时，Spring Boot会根据实体类自动更新数据库表结构
-7. **防火墙**：确保防火墙允许8080端口访问
+```bash
+./mvnw clean package -DskipTests
+java -jar target/logistic-0.0.1-SNAPSHOT.jar
+```
 
-## 九、常见问题解决
+## 配置说明
 
-### 1. 启动时连接数据库失败
-- 检查MySQL服务是否已启动
-- 检查数据库连接信息是否正确
-- 检查MySQL用户是否有访问权限
-- 检查防火墙是否允许访问3306端口
+| 配置项 | 环境变量 | 说明 |
+|--------|----------|------|
+| 数据库 URL | `SPRING_DATASOURCE_URL` | JDBC 连接串 |
+| 数据库用户 | `SPRING_DATASOURCE_USERNAME` | 默认 `root` |
+| 数据库密码 | `SPRING_DATASOURCE_PASSWORD` | 必填 |
+| JWT 密钥 | `APP_JWT_SECRET` | 生产环境务必修改 |
+| 备份目录 | `LOGISTIC_BACKUP_DIR` | 默认 `~/.logistic/backups` |
+| 钉钉 Webhook | `DINGTALK_ROBOT_WEBHOOK` | 留空则跳过通知 |
 
-### 2. 启动时出现表不存在错误
-- 确保已成功恢复数据库备份
-- 检查数据库名称是否正确
-- 检查配置文件中的数据库名是否与实际一致
+完整示例见 [`application-example.yaml`](src/main/resources/application-example.yaml)。
 
-### 3. 访问页面时出现404错误
-- 确保项目已成功启动
-- 检查访问地址是否正确
-- 检查项目是否包含静态资源
+## 架构示意
 
-### 4. 登录失败
-- 检查用户名和密码是否正确
-- 检查数据库中的`user`表是否有对应账号
-- 检查密码是否正确加密（系统使用BCrypt加密）
+```mermaid
+flowchart LR
+  subgraph Client
+    UI[静态页面 / 多角色工作台]
+  end
+  subgraph Server
+    API[Spring MVC Controllers]
+    SVC[Service 业务层]
+    SEC[Spring Security + JWT]
+    JPA[Spring Data JPA]
+  end
+  DB[(MySQL)]
+  UI -->|HTTP / REST| API
+  API --> SEC
+  API --> SVC --> JPA --> DB
+```
 
-## 十、联系方式
+更详细的组件与订单流程图见 [`docs/diagrams/`](docs/diagrams/)。
 
-如果在使用过程中遇到问题，请联系技术支持-qq：2118602087。
+## 常见问题
 
----
+**无法连接数据库**  
+确认 MySQL 已启动、库名 `mylogistic` 已创建、账号密码与 `application-local.yaml` 一致。
 
-**祝使用愉快！**
+**登录失败**  
+确认已导入 `database/seed/backup.sql`；管理员默认 `admin` / `admin`。
+
+**管理员备份失败**  
+需本机 PATH 中存在 `mysqldump` 与 `mysql`，且应用使用的数据库账号具备相应权限。
+
+## 安全提示
+
+- 请勿将 `application-local.yaml`、`.env` 或真实密码提交到 Git。
+- 若仓库历史中曾包含密钥，请在 GitHub 与对应服务（MySQL、钉钉等）**轮换密钥**。
+
+## 许可证
+
+本项目采用 [MIT License](LICENSE) 开源。
+
+## 相关链接
+
+- 仓库：https://github.com/wmlqq/logistic
+- English README：[README.en.md](README.en.md)

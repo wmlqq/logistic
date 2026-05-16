@@ -1,0 +1,237 @@
+digraph system_architecture {
+    rankdir=TB;
+    node [shape=box, style=rounded];
+    
+    subgraph cluster_frontend {
+        label = "前端页面";
+        color=blue;
+        
+        login_page [label="登录页面"];
+        register_page [label="注册页面"];
+        
+        subgraph cluster_admin {
+            label = "管理员页面";
+            admin_index [label="管理员首页"];
+            user_management [label="用户管理"];
+            system_settings [label="系统设置"];
+            operation_log [label="操作日志"];
+            backup_restore [label="备份恢复"];
+        }
+        
+        subgraph cluster_customer {
+            label = "客户页面";
+            customer_index [label="客户首页"];
+            create_order [label="创建订单"];
+            order_list [label="订单列表"];
+            order_detail [label="订单详情"];
+            address [label="地址管理"];
+            customer_profile [label="客户资料"];
+        }
+        
+        subgraph cluster_delivery {
+            label = "配送员页面";
+            delivery_index [label="配送员首页"];
+            delivery_task [label="配送任务"];
+            route_plan [label="路线规划"];
+            delivery_profile [label="配送员资料"];
+        }
+        
+        subgraph cluster_finance {
+            label = "财务页面";
+            finance_index [label="财务首页"];
+            financial_report [label="财务报表"];
+            order_report [label="订单报表"];
+            finance_profile [label="财务资料"];
+        }
+        
+        subgraph cluster_manager {
+            label = "经理页面";
+            manager_index [label="经理首页"];
+            order_management [label="订单管理"];
+            delivery_management [label="配送管理"];
+            warehouse_management [label="仓库管理"];
+            report [label="报表"];
+            manager_profile [label="经理资料"];
+        }
+        
+        subgraph cluster_warehouse {
+            label = "仓库页面";
+            warehouse_index [label="仓库首页"];
+            inventory [label="库存管理"];
+            inventory_alert [label="库存预警"];
+            stock_import_export [label="库存出入库"];
+            warehouse_location [label="库位管理"];
+            warehouse_profile [label="仓库资料"];
+        }
+    }
+    
+    subgraph cluster_controller {
+        label = "控制器层";
+        color=green;
+        
+        auth_controller [label="AuthController"];
+        user_controller [label="UserController"];
+        admin_controller [label="AdminController"];
+        customer_controller [label="CustomerController"];
+        delivery_controller [label="DeliveryController"];
+        finance_controller [label="FinanceController"];
+        manager_controller [label="ManagerController"];
+        warehouse_controller [label="WarehouseController"];
+        contact_controller [label="ContactController"];
+    }
+    
+    subgraph cluster_service {
+        label = "服务层";
+        color=orange;
+        
+        auth_service [label="AuthService"];
+        user_service [label="UserService"];
+        operation_log_service [label="OperationLogService"];
+        system_setting_service [label="SystemSettingService"];
+        dingtalk_robot_service [label="DingTalkRobotService"];
+    }
+    
+    subgraph cluster_repository {
+        label = "数据访问层";
+        color=purple;
+        
+        user_repository [label="UserRepository"];
+        order_repository [label="OrderRepository"];
+        delivery_task_repository [label="DeliveryTaskRepository"];
+        product_repository [label="ProductRepository"];
+        location_repository [label="LocationRepository"];
+        stock_change_repository [label="StockChangeRepository"];
+        operation_log_repository [label="OperationLogRepository"];
+        system_setting_repository [label="SystemSettingRepository"];
+        address_repository [label="AddressRepository"];
+        contact_repository [label="ContactRepository"];
+        expense_repository [label="ExpenseRepository"];
+        order_item_repository [label="OrderItemRepository"];
+    }
+    
+    subgraph cluster_entity {
+        label = "实体类";
+        color=red;
+        
+        user [label="User"];
+        order [label="Order"];
+        order_item [label="OrderItem"];
+        delivery_task [label="DeliveryTask"];
+        product [label="Product"];
+        location [label="Location"];
+        stock_change [label="StockChange"];
+        operation_log [label="OperationLog"];
+        system_setting [label="SystemSetting"];
+        address [label="Address"];
+        contact [label="Contact"];
+        expense [label="Expense"];
+    }
+    
+    subgraph cluster_util {
+        label = "工具类";
+        color=gray;
+        
+        jwt_util [label="JwtUtil"];
+        password_util [label="PasswordUtil"];
+    }
+    
+    subgraph cluster_config {
+        label = "配置类";
+        color=brown;
+        
+        security_config [label="SecurityConfig"];
+        web_mvc_config [label="WebMvcConfig"];
+    }
+    
+    // 前端到控制器的连接
+    login_page -> auth_controller;
+    register_page -> auth_controller;
+    
+    admin_index -> admin_controller;
+    user_management -> admin_controller;
+    system_settings -> admin_controller;
+    operation_log -> admin_controller;
+    backup_restore -> admin_controller;
+    
+    customer_index -> customer_controller;
+    create_order -> customer_controller;
+    order_list -> customer_controller;
+    order_detail -> customer_controller;
+    address -> customer_controller;
+    customer_profile -> user_controller;
+    
+    delivery_index -> delivery_controller;
+    delivery_task -> delivery_controller;
+    route_plan -> delivery_controller;
+    delivery_profile -> user_controller;
+    
+    finance_index -> finance_controller;
+    financial_report -> finance_controller;
+    order_report -> finance_controller;
+    finance_profile -> user_controller;
+    
+    manager_index -> manager_controller;
+    order_management -> manager_controller;
+    delivery_management -> manager_controller;
+    warehouse_management -> manager_controller;
+    report -> manager_controller;
+    manager_profile -> user_controller;
+    
+    warehouse_index -> warehouse_controller;
+    inventory -> warehouse_controller;
+    inventory_alert -> warehouse_controller;
+    stock_import_export -> warehouse_controller;
+    warehouse_location -> warehouse_controller;
+    warehouse_profile -> user_controller;
+    
+    // 控制器到服务的连接
+    auth_controller -> auth_service;
+    user_controller -> user_service;
+    admin_controller -> user_service;
+    admin_controller -> system_setting_service;
+    admin_controller -> operation_log_service;
+    customer_controller -> auth_service;
+    delivery_controller -> auth_service;
+    finance_controller -> auth_service;
+    manager_controller -> auth_service;
+    warehouse_controller -> auth_service;
+    contact_controller -> auth_service;
+    
+    // 服务到仓库的连接
+    auth_service -> user_repository;
+    user_service -> user_repository;
+    operation_log_service -> operation_log_repository;
+    system_setting_service -> system_setting_repository;
+    
+    // 服务到工具类的连接
+    auth_service -> jwt_util;
+    auth_service -> password_util;
+    
+    // 仓库到实体的连接
+    user_repository -> user;
+    order_repository -> order;
+    delivery_task_repository -> delivery_task;
+    product_repository -> product;
+    location_repository -> location;
+    stock_change_repository -> stock_change;
+    operation_log_repository -> operation_log;
+    system_setting_repository -> system_setting;
+    address_repository -> address;
+    contact_repository -> contact;
+    expense_repository -> expense;
+    order_item_repository -> order_item;
+    
+    // 实体间关系
+    order -> user [label="关联用户"];
+    order -> order_item [label="包含订单项"];
+    order_item -> product [label="关联产品"];
+    delivery_task -> order [label="关联订单"];
+    delivery_task -> user [label="分配给配送员"];
+    product -> location [label="存储位置"];
+    stock_change -> product [label="关联产品"];
+    stock_change -> user [label="操作人"];
+    address -> user [label="所属用户"];
+    contact -> user [label="所属用户"];
+    expense -> user [label="关联用户"];
+    operation_log -> user [label="操作人"];
+}

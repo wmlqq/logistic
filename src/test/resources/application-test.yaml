@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:logistic_test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+app:
+  jwt:
+    secret: test-jwt-secret-key-at-least-32-chars-long
+    expiration-days: 1
+
+dingtalk:
+  robot:
+    webhook:
+
+logistic:
+  backup:
+    directory: ${java.io.tmpdir}/logistic-test-backups

@@ -404,7 +404,7 @@
                         type: 'POST',
                         success: function(response) {
                             if (response.code === 0) {
-                                alert('数据备份创建成功！备份文件已保存到服务器的 D:/logistic_backups 目录，您可以在备份历史中下载。');
+                                alert('数据备份创建成功！备份文件已保存到服务器配置的备份目录，您可以在备份历史中下载。');
                                 loadBackupHistory();
                             }
                         },

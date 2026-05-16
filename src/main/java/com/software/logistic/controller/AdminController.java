@@ -1,14 +1,17 @@
 package com.software.logistic.controller;
 
 import com.software.logistic.common.ResponseResult;
+import com.software.logistic.config.LogisticProperties;
 import com.software.logistic.entity.OperationLog;
 import com.software.logistic.entity.User;
 import com.software.logistic.repository.OperationLogRepository;
 import com.software.logistic.entity.SystemSetting;
 import com.software.logistic.repository.UserRepository;
 import com.software.logistic.service.SystemSettingService;
+import com.software.logistic.utils.DatabaseConnectionInfo;
 import com.software.logistic.utils.PasswordUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +43,18 @@ public class AdminController {
 
     @Autowired
     private SystemSettingService systemSettingService;
+
+    @Autowired
+    private LogisticProperties logisticProperties;
+
+    @Value("${spring.datasource.url}")
+    private String datasourceUrl;
+
+    @Value("${spring.datasource.username}")
+    private String datasourceUsername;
+
+    @Value("${spring.datasource.password}")
+    private String datasourcePassword;
 
     /**
      * 系统管理员仪表盘统计
@@ -381,33 +396,24 @@ public class AdminController {
     @PostMapping("/backup")
     public ResponseResult<?> backupData() {
         try {
-            // 创建备份目录
-            String backupDir = "D:/logistic_backups";
+            String backupDir = logisticProperties.getBackup().getDirectory();
             File dir = new File(backupDir);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
-            
-            // 生成备份文件名
+
             String backupId = UUID.randomUUID().toString().replace("-", "");
             String backupFileName = backupId + ".sql";
             String backupFilePath = backupDir + File.separator + backupFileName;
-            
-            // 数据库连接信息
-            String dbHost = "localhost";
-            String dbPort = "3306";
-            String dbName = "mylogistic";
-            String dbUser = "root";
-            String dbPassword = "3141306947w666W@";
-            
-            // 执行mysqldump命令进行备份
+
+            DatabaseConnectionInfo db = DatabaseConnectionInfo.fromJdbcUrl(datasourceUrl);
             ProcessBuilder processBuilder = new ProcessBuilder(
                 "mysqldump",
-                "-h", dbHost,
-                "-P", dbPort,
-                "-u", dbUser,
-                "-p" + dbPassword,
-                dbName,
+                "-h", db.getHost(),
+                "-P", db.getPort(),
+                "-u", datasourceUsername,
+                "-p" + datasourcePassword,
+                db.getDatabaseName(),
                 "--result-file=" + backupFilePath
             );
             
@@ -439,32 +445,24 @@ public class AdminController {
     @PostMapping("/restore")
     public ResponseResult<?> restoreData(@RequestParam("backupFile") MultipartFile file) {
         try {
-            // 数据库连接信息
-            String dbHost = "localhost";
-            String dbPort = "3306";
-            String dbName = "mylogistic";
-            String dbUser = "root";
-            String dbPassword = "3141306947w666W@";
-            
-            // 保存上传的备份文件
-            String tempDir = "D:/logistic_backups/temp";
+            DatabaseConnectionInfo db = DatabaseConnectionInfo.fromJdbcUrl(datasourceUrl);
+            String tempDir = logisticProperties.getBackup().getDirectory() + File.separator + "temp";
             File dir = new File(tempDir);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
-            
+
             String tempFilePath = tempDir + File.separator + "temp_backup.sql";
             File tempFile = new File(tempFilePath);
             file.transferTo(tempFile);
-            
-            // 执行mysql命令进行恢复
+
             ProcessBuilder processBuilder = new ProcessBuilder(
                 "mysql",
-                "-h", dbHost,
-                "-P", dbPort,
-                "-u", dbUser,
-                "-p" + dbPassword,
-                dbName
+                "-h", db.getHost(),
+                "-P", db.getPort(),
+                "-u", datasourceUsername,
+                "-p" + datasourcePassword,
+                db.getDatabaseName()
             );
             
             Process process = processBuilder.start();
@@ -497,8 +495,7 @@ public class AdminController {
     @GetMapping("/backup/history")
     public ResponseResult<?> getBackupHistory() {
         try {
-            // 备份目录
-            String backupDir = "D:/logistic_backups";
+            String backupDir = logisticProperties.getBackup().getDirectory();
             File dir = new File(backupDir);
             
             List<Map<String, Object>> history = new ArrayList<>();
@@ -556,8 +553,7 @@ public class AdminController {
     @GetMapping("/backup/download/{backupId}")
     public void downloadBackup(@PathVariable String backupId, HttpServletResponse response) {
         try {
-            // 备份目录
-            String backupDir = "D:/logistic_backups";
+            String backupDir = logisticProperties.getBackup().getDirectory();
             String backupFileName = backupId + ".sql";
             String backupFilePath = backupDir + File.separator + backupFileName;
             File backupFile = new File(backupFilePath);

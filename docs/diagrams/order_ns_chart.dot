@@ -1,0 +1,63 @@
+digraph flowchart {
+    rankdir=TB;
+    
+    // 主程序框
+    main [label="订单处理流程", shape=box, style=rounded];
+    
+    // 客户下单模块
+    customer_module [label="客户下单", shape=box, style=rounded];
+    customer_steps [label="客户登录\n创建订单\n选择产品\n填写收货地址\n确认订单\n支付订单", shape=box];
+    
+    // 订单审核模块
+    review_module [label="订单审核", shape=box, style=rounded];
+    review_steps [label="经理审核订单", shape=box];
+    review_yes [label="审核通过", shape=box];
+    review_no [label="审核失败", shape=box];
+    
+    // 仓库处理模块
+    warehouse_module [label="仓库处理", shape=box, style=rounded];
+    warehouse_steps [label="仓库接收订单\n检查库存", shape=box];
+    inventory_yes [label="库存充足\n拣货\n包装", shape=box];
+    inventory_no [label="库存不足", shape=box];
+    
+    // 配送模块
+    delivery_module [label="配送处理", shape=box, style=rounded];
+    delivery_steps [label="分配配送任务\n配送员接收任务\n上门取件\n配送货物\n客户签收", shape=box];
+    
+    // 完成模块
+    complete_module [label="订单完成", shape=ellipse];
+    
+    // 连接节点
+    main -> customer_module;
+    customer_module -> customer_steps;
+    customer_steps -> review_module;
+    review_module -> review_steps;
+    review_steps -> review_yes [label="是"];
+    review_steps -> review_no [label="否"];
+    
+    review_yes -> warehouse_module;
+    warehouse_module -> warehouse_steps;
+    warehouse_steps -> inventory_yes [label="是"];
+    warehouse_steps -> inventory_no [label="否"];
+    
+    inventory_yes -> delivery_module;
+    delivery_module -> delivery_steps;
+    delivery_steps -> complete_module;
+    
+    review_no -> complete_module;
+    inventory_no -> complete_module;
+    
+    // 设置层次结构，使图表更像N-S图
+    {rank=same; main}
+    {rank=same; customer_module}
+    {rank=same; customer_steps}
+    {rank=same; review_module}
+    {rank=same; review_steps}
+    {rank=same; review_yes; review_no}
+    {rank=same; warehouse_module}
+    {rank=same; warehouse_steps}
+    {rank=same; inventory_yes; inventory_no}
+    {rank=same; delivery_module}
+    {rank=same; delivery_steps}
+    {rank=same; complete_module}
+}
